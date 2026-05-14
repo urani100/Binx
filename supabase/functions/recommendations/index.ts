@@ -1,6 +1,6 @@
 import Anthropic from 'npm:@anthropic-ai/sdk'
 import { corsHeaders } from '../_shared/cors.ts'
-import { BINX_SYSTEM_PROMPT, buildRecommendationPrompt } from '../_shared/prompts.ts'
+import { BINX_SYSTEM_PROMPT, RECOMMENDATIONS_TOOL, buildRecommendationPrompt } from '../_shared/prompts.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -61,9 +61,10 @@ Deno.serve(async (req) => {
     const response = await Promise.race([
       anthropic.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 2500,
-        temperature: 0.7,
+        max_tokens: 1500,
         system: BINX_SYSTEM_PROMPT,
+        tools: [RECOMMENDATIONS_TOOL],
+        tool_choice: { type: 'tool', name: 'generate_recommendations' },
         messages: [{ role: 'user', content: prompt }],
       }),
       new Promise<never>((_, reject) =>
@@ -71,25 +72,21 @@ Deno.serve(async (req) => {
       ),
     ])
 
-    const claudeContent = (response as Anthropic.Message).content[0].type === 'text'
-      ? (response as Anthropic.Message).content[0].text
-      : ''
-
-    let recommendations
-    try {
-      recommendations = JSON.parse(claudeContent)
-    } catch {
-      recommendations = parseTextRecommendations(claudeContent)
-    }
-
-    if (!recommendations || !Array.isArray(recommendations.recommendations)) {
+    const toolBlock = (response as Anthropic.Message).content.find(b => b.type === 'tool_use')
+    if (!toolBlock || toolBlock.type !== 'tool_use') {
       throw new Error('Generated recommendations could not be processed. Please try again.')
     }
 
-    const enriched = recommendations.recommendations.map((r: Record<string, unknown>) => ({
+    const result = toolBlock.input as { recommendations: Record<string, unknown>[]; reasoning: string }
+
+    if (!Array.isArray(result.recommendations)) {
+      throw new Error('Generated recommendations could not be processed. Please try again.')
+    }
+
+    const enriched = result.recommendations.map((r: Record<string, unknown>) => ({
       ...r,
       placeId: null,
-      aiScore: (r.confidence as number) || 0.8,
+      aiScore: (r.ai_confidence as number) || 0.8,
     }))
 
     const processingTime = Date.now() - startTime
@@ -98,6 +95,7 @@ Deno.serve(async (req) => {
       success: true,
       data: {
         recommendations: enriched,
+        reasoning: result.reasoning,
         cache_key: cache_key || generateCacheKey(userContext),
         processing_time: processingTime,
         data_quality,
@@ -171,32 +169,6 @@ function transformToUserContext({ current_location, weather_data, user_preferenc
   }
 }
 
-function parseTextRecommendations(text: string) {
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (jsonMatch) return JSON.parse(jsonMatch[0])
-
-  const lines = text.split('\n').filter(l => l.trim())
-  const recommendations: Record<string, string>[] = []
-  let current: Record<string, string> | null = null
-
-  for (const line of lines) {
-    const trimmed = line.trim()
-    if (trimmed.match(/^\d+\.|\*\*|^-/) && trimmed.length > 10) {
-      if (current) recommendations.push(current)
-      current = {
-        name: trimmed.replace(/^\d+\.\s*|\*\*|\s*-\s*/, '').split(':')[0].trim(),
-        description: trimmed.includes(':') ? trimmed.split(':').slice(1).join(':').trim() : 'A recommended location for you',
-        category: 'Local Spot',
-        address: 'Address not specified',
-      }
-    } else if (current && trimmed.length > 20) {
-      current.description += ' ' + trimmed
-    }
-  }
-  if (current) recommendations.push(current)
-
-  return { recommendations }
-}
 
 function generateCacheKey(userContext: ReturnType<typeof transformToUserContext>) {
   const { current_context } = userContext

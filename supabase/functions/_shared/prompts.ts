@@ -1,24 +1,38 @@
-export const BINX_SYSTEM_PROMPT = `Generate 7-10 location recommendations matching user's context.
+export const BINX_SYSTEM_PROMPT = `You are a local discovery assistant for BiNx.
+Recommend real, specific places based on the user's location, weather, time of day, and preferences.
+Only suggest places that genuinely exist. Prioritize variety across categories.`
 
-OUTPUT FORMAT (JSON only):
-{
-  "recommendations": [
-    {
-      "name": "Place Name",
-      "address": "Full address",
-      "category": "cafe|restaurant|park|gallery|bar",
-      "vibe_match_reason": "Why this place is a good recommendation (max 20 words)",
-      "distance_km": 2.1,
-      "estimated_minutes": 15,
-      "current_status": "Open until 9 PM",
-      "ai_confidence": 0.85,
-      "tags": ["cozy", "creative"]
-    }
-  ],
-  "reasoning": "Brief strategy (max 30 words)"
-}
-
-RULES: Real places only.`
+export const RECOMMENDATIONS_TOOL = {
+  name: 'generate_recommendations',
+  description: 'Generate location recommendations for the user based on their current context and preferences.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      recommendations: {
+        type: 'array',
+        minItems: 7,
+        maxItems: 10,
+        items: {
+          type: 'object',
+          required: ['name', 'address', 'category', 'vibe_match_reason', 'distance_km', 'estimated_minutes', 'ai_confidence', 'tags'],
+          properties: {
+            name:              { type: 'string' },
+            address:           { type: 'string' },
+            category:          { type: 'string', enum: ['cafe', 'restaurant', 'park', 'gallery', 'bar'] },
+            vibe_match_reason: { type: 'string', description: 'Why this place matches the user (max 20 words)' },
+            distance_km:       { type: 'number' },
+            estimated_minutes: { type: 'integer' },
+            current_status:    { type: 'string' },
+            ai_confidence:     { type: 'number', minimum: 0, maximum: 1 },
+            tags:              { type: 'array', items: { type: 'string' } }
+          }
+        }
+      },
+      reasoning: { type: 'string', description: 'Brief strategy behind these picks (max 30 words)' }
+    },
+    required: ['recommendations', 'reasoning']
+  }
+} as const
 
 export function buildRecommendationPrompt(userContext: {
   current_context: {
