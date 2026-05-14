@@ -224,7 +224,7 @@ export const useUIStore = create(
           recommendationsModal: {
             ...get().recommendationsModal,
             error,
-            loading: false
+            ...(error !== null && { loading: false })
           }
         })
       },
