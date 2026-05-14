@@ -7,8 +7,6 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  const startTime = Date.now()
-
   try {
     const body = await req.json()
     const {
@@ -58,51 +56,52 @@ Deno.serve(async (req) => {
 
     const anthropic = new Anthropic({ apiKey })
 
-    const response = await Promise.race([
-      anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        system: BINX_SYSTEM_PROMPT,
-        tools: [RECOMMENDATIONS_TOOL],
-        tool_choice: { type: 'tool', name: 'generate_recommendations' },
-        messages: [{ role: 'user', content: prompt }],
-      }),
+    // Stream from Claude and collect tool input_json_delta events
+    const stream = anthropic.messages.stream({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1500,
+      system: BINX_SYSTEM_PROMPT,
+      tools: [RECOMMENDATIONS_TOOL],
+      tool_choice: { type: 'tool', name: 'generate_recommendations' },
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    let jsonBuffer = ''
+    await Promise.race([
+      (async () => {
+        for await (const event of stream) {
+          if (event.type === 'content_block_delta' && event.delta.type === 'input_json_delta') {
+            jsonBuffer += event.delta.partial_json
+          }
+        }
+      })(),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Claude API timeout')), 100000)
       ),
     ])
 
-    const toolBlock = (response as Anthropic.Message).content.find(b => b.type === 'tool_use')
-    if (!toolBlock || toolBlock.type !== 'tool_use') {
-      throw new Error('Generated recommendations could not be processed. Please try again.')
-    }
-
-    const result = toolBlock.input as { recommendations: Record<string, unknown>[]; reasoning: string }
+    const result = JSON.parse(jsonBuffer) as { recommendations: Record<string, unknown>[]; reasoning: string }
 
     if (!Array.isArray(result.recommendations)) {
       throw new Error('Generated recommendations could not be processed. Please try again.')
     }
 
-    const enriched = result.recommendations.map((r: Record<string, unknown>) => ({
-      ...r,
-      placeId: null,
-      aiScore: (r.ai_confidence as number) || 0.8,
-    }))
+    const cacheKey = cache_key || generateCacheKey(userContext)
+    const encoder = new TextEncoder()
 
-    const processingTime = Date.now() - startTime
+    const readable = new ReadableStream({
+      start(controller) {
+        for (const r of result.recommendations) {
+          const enriched = { ...r, placeId: null, aiScore: (r.ai_confidence as number) || 0.8 }
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(enriched)}\n\n`))
+        }
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, cache_key: cacheKey, reasoning: result.reasoning })}\n\n`))
+        controller.close()
+      }
+    })
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: {
-        recommendations: enriched,
-        reasoning: result.reasoning,
-        cache_key: cache_key || generateCacheKey(userContext),
-        processing_time: processingTime,
-        data_quality,
-      },
-      timestamp: new Date().toISOString(),
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(readable, {
+      headers: { ...corsHeaders, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' },
     })
 
   } catch (error) {

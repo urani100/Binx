@@ -153,13 +153,39 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 throw new Error(errorData.message || `API error: ${response.status}`)
             }
 
-            const data = await response.json()
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            const accumulated = []
+            let buffer = ''
+            let cacheKey = null
 
-            if (data.success && data.data.recommendations) {
-                setCurrentRecommendations(data.data.recommendations, data.data.cache_key)
-            } else {
-                throw new Error('Invalid API response format')
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                buffer += decoder.decode(value, { stream: true })
+                const parts = buffer.split('\n\n')
+                buffer = parts.pop() ?? ''
+
+                for (const part of parts) {
+                    if (!part.startsWith('data: ')) continue
+                    const payload = part.slice(6).trim()
+                    try {
+                        const parsed = JSON.parse(payload)
+                        if (parsed.done) {
+                            cacheKey = parsed.cache_key
+                        } else {
+                            accumulated.push(parsed)
+                            setCurrentRecommendations([...accumulated], null)
+                        }
+                    } catch { /* skip malformed chunk */ }
+                }
             }
+
+            if (accumulated.length === 0) {
+                throw new Error('No recommendations received')
+            }
+            setCurrentRecommendations(accumulated, cacheKey)
 
         } catch (error) {
             setRecommendationsError(`Failed to generate recommendations: ${error.message}`)
@@ -244,7 +270,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 )}
 
                 {/* Loading */}
-                {loading && (
+                {loading && currentRecommendations.length === 0 && (
                     <div className="text-center py-8">
                         <p className="text-customPurpleText font-medium">Generating Recommendations...</p>
                     </div>
