@@ -26,7 +26,7 @@
  import './App.css'
  
  function App() {
-   const { user, isAuthenticated, initialize } = useAuth()
+   const { user, isAuthenticated, initialize, profileLoaded } = useAuth()
    const { deletePin } = usePins()
  
    // UI Store selectors
@@ -59,12 +59,12 @@
      initialize()
    }, [initialize])
 
-   // Auto-trigger onboarding for new users who haven't completed it
+   // Auto-trigger onboarding only after profile is loaded from DB
    useEffect(() => {
-     if (isAuthenticated && user && !user.profile?.onboardingCompleted) {
+     if (isAuthenticated && user && profileLoaded && !user.profile?.onboardingCompleted) {
        showOnboardingModal()
      }
-   }, [isAuthenticated, user?.profile?.onboardingCompleted])
+   }, [isAuthenticated, profileLoaded, user?.profile?.onboardingCompleted])
  
    /**
     * Handle delete confirmation

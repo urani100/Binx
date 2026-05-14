@@ -13,73 +13,111 @@ export const useAuthStore = create(
       loading: false,
       error: null,
       isInitialized: false,
+      profileLoaded: false,
 
       initialize: () => {
         if (get().isInitialized) return
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          set({ loading: true })
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          // Synchronous — never await REST calls inside this listener.
+          // Doing so causes a deadlock: the SDK queues REST calls until auth
+          // state settles, but auth state can't settle until the callback
+          // finishes, which is waiting for the REST call.
+          if (session?.user) {
+            const supabaseUser = session.user
+            const existingUser = get().user
+            // Reuse already-loaded profile on token refresh (same user)
+            const existingProfile = existingUser?.id === supabaseUser.id
+              ? existingUser.profile
+              : null
 
-          try {
-            if (session?.user) {
-              const supabaseUser = session.user
-
-              let userProfile = {}
-              try {
-                const { data } = await supabase
-                  .from('users')
-                  .select('profile')
-                  .eq('id', supabaseUser.id)
-                  .single()
-                if (data) userProfile = data.profile || {}
-              } catch (err) {
-                console.warn('Failed to load user profile:', err)
+            const userData = {
+              id: supabaseUser.id,
+              email: supabaseUser.email,
+              name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
+              profilePic: supabaseUser.user_metadata?.avatar_url || existingProfile?.profilePic || null,
+              profile: existingProfile || {
+                alterEgo: '',
+                currentResidence: '',
+                occupation: '',
+                currentlyReading: '',
+                lastMovieWatched: '',
+                nextMovie: '',
+                currentlyWearing: '',
+                favoriteBrand: '',
+                favoriteAuthors: '',
+                favoriteVibe: '',
+                idealSunday: '',
+                onboardingCompleted: false,
+                cuisinePreferences: [],
+                activityTypes: [],
+                priceComfort: 'mid-range',
+                discoveryStyle: 'hidden-gems',
+                socialPreference: 'intimate-pairs',
+                aestheticPreferences: [],
+                avoidancePreferences: [],
+                enhancedOnboardingCompleted: false
               }
-
-              const userData = {
-                id: supabaseUser.id,
-                email: supabaseUser.email,
-                name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
-                profilePic: supabaseUser.user_metadata?.avatar_url || userProfile.profilePic || null,
-                profile: {
-                  alterEgo: userProfile.alterEgo || '',
-                  currentResidence: userProfile.currentResidence || '',
-                  occupation: userProfile.occupation || '',
-                  currentlyReading: userProfile.currentlyReading || '',
-                  lastMovieWatched: userProfile.lastMovieWatched || '',
-                  nextMovie: userProfile.nextMovie || '',
-                  currentlyWearing: userProfile.currentlyWearing || '',
-                  favoriteBrand: userProfile.favoriteBrand || '',
-                  favoriteAuthors: userProfile.favoriteAuthors || '',
-                  favoriteVibe: userProfile.favoriteVibe || '',
-                  idealSunday: userProfile.idealSunday || '',
-                  onboardingCompleted: userProfile.onboardingCompleted || false,
-                  cuisinePreferences: userProfile.cuisinePreferences || [],
-                  activityTypes: userProfile.activityTypes || [],
-                  priceComfort: userProfile.priceComfort || 'mid-range',
-                  discoveryStyle: userProfile.discoveryStyle || 'hidden-gems',
-                  socialPreference: userProfile.socialPreference || 'intimate-pairs',
-                  aestheticPreferences: userProfile.aestheticPreferences || [],
-                  avoidancePreferences: userProfile.avoidancePreferences || [],
-                  enhancedOnboardingCompleted: userProfile.enhancedOnboardingCompleted || false
-                }
-              }
-
-              set({ user: userData, error: null })
-            } else {
-              usePinsStore.getState().cleanup()
-              useUIStore.getState().navigateToAuth()
-              set({ user: null, error: null })
             }
-          } catch (error) {
-            console.error('Auth state change error:', error)
-            set({ error: handleSupabaseError(error) })
-          } finally {
-            set({ loading: false, isInitialized: true })
+
+            set({ user: userData, error: null, loading: false, isInitialized: true })
+            // Fetch saved profile from DB outside the listener — safe from deadlock
+            get().loadUserProfile(supabaseUser.id)
+          } else {
+            usePinsStore.getState().cleanup()
+            useUIStore.getState().navigateToAuth()
+            set({ user: null, error: null, loading: false, isInitialized: true, profileLoaded: false })
           }
         })
 
         set({ unsubscribe: () => subscription.unsubscribe() })
+      },
+
+      loadUserProfile: async (userId) => {
+        try {
+          const { data } = await supabase
+            .from('users')
+            .select('profile')
+            .eq('id', userId)
+            .single()
+
+          const { user } = get()
+          if (user?.id === userId) {
+            const saved = data?.profile || {}
+            set({
+              user: {
+                ...user,
+                profilePic: user.profilePic || saved.profilePic || null,
+                profile: {
+                  alterEgo: saved.alterEgo || '',
+                  currentResidence: saved.currentResidence || '',
+                  occupation: saved.occupation || '',
+                  currentlyReading: saved.currentlyReading || '',
+                  lastMovieWatched: saved.lastMovieWatched || '',
+                  nextMovie: saved.nextMovie || '',
+                  currentlyWearing: saved.currentlyWearing || '',
+                  favoriteBrand: saved.favoriteBrand || '',
+                  favoriteAuthors: saved.favoriteAuthors || '',
+                  favoriteVibe: saved.favoriteVibe || '',
+                  idealSunday: saved.idealSunday || '',
+                  onboardingCompleted: saved.onboardingCompleted || false,
+                  cuisinePreferences: saved.cuisinePreferences || [],
+                  activityTypes: saved.activityTypes || [],
+                  priceComfort: saved.priceComfort || 'mid-range',
+                  discoveryStyle: saved.discoveryStyle || 'hidden-gems',
+                  socialPreference: saved.socialPreference || 'intimate-pairs',
+                  aestheticPreferences: saved.aestheticPreferences || [],
+                  avoidancePreferences: saved.avoidancePreferences || [],
+                  enhancedOnboardingCompleted: saved.enhancedOnboardingCompleted || false
+                }
+              },
+              profileLoaded: true
+            })
+          }
+        } catch (err) {
+          console.warn('Failed to load user profile:', err)
+          set({ profileLoaded: true })
+        }
       },
 
       login: withErrorHandling(async (email, password) => {

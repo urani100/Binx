@@ -19,6 +19,7 @@
    const loading = useAuthStore(state => state.loading)
    const error = useAuthStore(state => state.error)
    const isInitialized = useAuthStore(state => state.isInitialized)
+   const profileLoaded = useAuthStore(state => state.profileLoaded)
  
    // Store actions
    const initialize = useAuthStore(state => state.initialize)
@@ -178,6 +179,7 @@
      isAuthenticated,
      isDemo,
      hasCompletedOnboarding,
+     profileLoaded,
  
      // Actions
      initialize,
