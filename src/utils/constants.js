@@ -5,10 +5,11 @@
  * Date: August 8, 2025
  */
 
-// API Endpoints (Your secure Firebase Functions)
+// API Endpoints (Supabase Edge Functions)
 export const API_ENDPOINTS = {
-    WEATHER: 'https://us-east1-binx-3a213.cloudfunctions.net/api/weather',
-    GEOCODE: 'https://us-east1-binx-3a213.cloudfunctions.net/api/geocode'
+    WEATHER: 'https://ttnunlnryjtvnnqvpplb.supabase.co/functions/v1/weather',
+    GEOCODE: 'https://ttnunlnryjtvnnqvpplb.supabase.co/functions/v1/geocode',
+    RECOMMENDATIONS: 'https://ttnunlnryjtvnnqvpplb.supabase.co/functions/v1/recommendations',
   }
   
   // Google Maps Configuration (Restricted Frontend Key)

@@ -29,9 +29,6 @@
    return message || ERROR_MESSAGES.GENERAL.UNKNOWN_ERROR
  }
 
- /** @deprecated Use handleSupabaseError instead */
- export const handleFirebaseError = handleSupabaseError
- 
  /**
   * API Error Handler
   * Handles errors from external API calls (Weather, Geocoding)

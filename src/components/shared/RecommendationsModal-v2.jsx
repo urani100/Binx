@@ -19,6 +19,7 @@ import { usePins } from '../../hooks/usePins'
 import { useUIStore } from '../../store/uiStore'
 import { LoadingSpinner } from '../ui'
 import { useLocationStore } from '../../store/locationStore'
+import { API_ENDPOINTS } from '../../utils/constants'
 
 /**
  * RecommendationsModal Component - Enhanced with Loading Validation
@@ -275,7 +276,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
             })
 
             // Call recommendations API
-            const response = await fetch('https://us-east1-binx-3a213.cloudfunctions.net/api/recommendations', {
+            const response = await fetch(API_ENDPOINTS.RECOMMENDATIONS, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
