@@ -246,7 +246,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 {/* Loading */}
                 {loading && (
                     <div className="text-center py-8">
-                        <LoadingSpinner size="lg" color="primary" text="Hang Tight, curating picks you'll love..." />
+                        <p className="text-customPurpleText font-medium">Generating Recommendations...</p>
                     </div>
                 )}
 
