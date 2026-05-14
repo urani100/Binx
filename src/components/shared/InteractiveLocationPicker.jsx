@@ -8,7 +8,7 @@
 
 import React, { useRef, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { GUIDES } from '../../utils/constants'
+import { GUIDES, GOOGLE_MAPS_CONFIG } from '../../utils/constants'
 
 // ---------- Module-level cache (survives remounts) ----------
 const _placesCache = new Map()
@@ -194,7 +194,7 @@ const InteractiveLocationPicker = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': 'AIzaSyDkK930rjzJoTr7xQSWvrd5r3O3N-d2Puw',
+          'X-Goog-Api-Key': GOOGLE_MAPS_CONFIG.API_KEY,
           'X-Goog-FieldMask': 'places.displayName,places.id,places.location,places.rating,places.priceLevel,places.types,places.formattedAddress'
         },
         body: JSON.stringify({

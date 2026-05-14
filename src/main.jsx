@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
+import { GOOGLE_MAPS_CONFIG } from './utils/constants'
 
 // Import Font Awesome CSS (Enterprise approach - no CDN)
 import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -14,7 +15,7 @@ const loadGoogleMaps = () => {
       return;
     }
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDkK930rjzJoTr7xQSWvrd5r3O3N-d2Puw&libraries=geometry';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_CONFIG.API_KEY}&libraries=geometry`;
     script.async = true;
     script.defer = true;
     script.onload = resolve;

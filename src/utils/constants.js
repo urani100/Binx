@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   
   // Google Maps Configuration (Restricted Frontend Key)
   export const GOOGLE_MAPS_CONFIG = {
-    API_KEY: 'AIzaSyDkK930rjzJoTr7xQSWvrd5r3O3N-d2Puw',
+    API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     LIBRARIES: ['geometry', 'places'],
     SCRIPT_URL: 'https://maps.googleapis.com/maps/api/js'
   }
