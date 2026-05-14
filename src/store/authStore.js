@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware'
 import { supabase } from '../services/supabase'
 import { DEMO_USER } from '../utils/constants'
 import { handleSupabaseError, withErrorHandling } from '../services/errorInterceptor'
+import { usePinsStore } from './pinsStore'
+import { useUIStore } from './uiStore'
 
 export const useAuthStore = create(
   persist(
@@ -65,6 +67,8 @@ export const useAuthStore = create(
 
               set({ user: userData, error: null })
             } else {
+              usePinsStore.getState().cleanup()
+              useUIStore.getState().navigateToAuth()
               set({ user: null, error: null })
             }
           } catch (error) {
@@ -125,6 +129,8 @@ export const useAuthStore = create(
         const { user } = get()
 
         if (user?.id === DEMO_USER.id) {
+          usePinsStore.getState().cleanup()
+          useUIStore.getState().navigateToAuth()
           set({ user: null, error: null })
         } else {
           const { error } = await supabase.auth.signOut()

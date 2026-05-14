@@ -160,10 +160,9 @@
    const logoutWithCleanup = async () => {
      try {
        await logout()
-       // UI store will handle navigation in its effect
      } catch (error) {
-       console.error('Logout error:', error)
        showMessage('Logout Error', 'Failed to logout properly')
+       throw error
      }
    }
  

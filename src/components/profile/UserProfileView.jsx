@@ -128,9 +128,13 @@
    /**
     * Handle logout - EXACT ORIGINAL
     */
-   const handleLogout = () => {
-     logout()
-     onClose()
+   const handleLogout = async () => {
+     try {
+       await logout()
+       onClose()
+     } catch {
+       // error shown via message modal; keep profile open
+     }
    }
  
    if (!isOpen) return null
