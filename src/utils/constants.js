@@ -13,6 +13,13 @@ export const API_ENDPOINTS = {
     RECOMMENDATIONS: `${_supabaseBase}/functions/v1/recommendations`,
   }
   
+  // Google Maps Configuration (Restricted Frontend Key)
+  export const GOOGLE_MAPS_CONFIG = {
+    API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    LIBRARIES: ['geometry', 'places'],
+    SCRIPT_URL: 'https://maps.googleapis.com/maps/api/js'
+  }
+  
   // Vibe Tags for Pin Creation
   export const VIBES = [
     'blissful',

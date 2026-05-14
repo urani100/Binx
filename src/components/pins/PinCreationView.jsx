@@ -18,6 +18,7 @@
  import { CustomAudioPlayer } from '../shared'
  import { VIBES, API_ENDPOINTS } from '../../utils/constants'
  import { edgeFunctionHeaders } from '../../services/supabase'
+ import { InteractiveLocationPicker } from '../shared'
  
  
  
@@ -486,6 +487,18 @@
              )}
            </div>
  
+           {/* Interactive Location Picker */}
+           {/* <InteractiveLocationPicker
+             userLocation={mapLocation || userLocation}  // Use searched location if available
+             selectedGuideName={selectedGuideName}
+             onLocationChange={async (newLocation) => {
+               console.log('Map location changed to:', newLocation)
+               setMapLocation(newLocation)  // Update local map state only
+             }}
+             onLocationNameChange={(newName) => {
+               setLocationName(newName)
+             }}
+           /> */}
          </div>
        </div>
      </div>
