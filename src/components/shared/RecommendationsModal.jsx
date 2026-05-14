@@ -285,8 +285,8 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 {/* Current Recommendations */}
                 {currentRecommendations.length > 0 && (
                     <div className="mb-6">
-                        <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory">
-                            <div className="flex gap-4 px-6" ref={currentScrollRef}>
+                        <div className="overflow-y-auto scroll-smooth">
+                            <div className="flex flex-col gap-4" ref={currentScrollRef}>
                                 {currentRecommendations.map((rec, index) => (
                                     <RecommendationCard
                                         key={index}
@@ -305,8 +305,8 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 {savedRecommendations.length > 0 && (
                     <div className="mb-6">
                         <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-6">Saved</h3>
-                        <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory">
-                            <div className="flex gap-4 px-6" ref={savedScrollRef}>
+                        <div className="overflow-y-auto scroll-smooth">
+                            <div className="flex flex-col gap-4" ref={savedScrollRef}>
                                 {savedRecommendations.map((rec, index) => (
                                     <RecommendationCard
                                         key={`saved-${index}`}
@@ -327,7 +327,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
 }
 
 const RecommendationCard = ({ recommendation, onSave, onRemove, onDirections, isSaved, showSavedDate }) => (
-    <div className="cursor-pointer rounded-xl p-4 transition-all snap-center flex-shrink-0 bg-gray-50 w-72">
+    <div className="cursor-pointer rounded-xl p-4 transition-all bg-gray-50 w-full">
         <div className="flex justify-between items-start mb-2">
             <h4 className="font-medium text-gray-900 text-sm">{recommendation.name}</h4>
             <div className="flex items-center space-x-1">
