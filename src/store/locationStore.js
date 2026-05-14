@@ -40,7 +40,6 @@
      try {
        // Get coordinates
        const coords = await getCurrentLocation()
-       console.log('Got coordinates:', coords)
  
        let locationData = { ...coords }
  
@@ -60,7 +59,6 @@
          locationData.condition = weatherData.current.condition.text
          locationData.weatherIcon = weatherData.current.condition.icon
          
-         console.log('Weather data loaded:', weatherData)
        } catch (error) {
          console.warn('Weather fetch failed:', error)
          // Continue without weather data
@@ -133,7 +131,6 @@
              ? `${displayLocation}, ${country}` 
              : geocodeData.results[0].formatted_address
  
-           console.log('Geocoding data loaded:', locationData)
          }
        } catch (error) {
          console.warn('Geocoding failed:', error)

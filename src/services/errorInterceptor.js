@@ -1,6 +1,6 @@
 /**
  * Error Interceptor Service for BiNx React App
- * Purpose: Centralized error handling and logging for API calls and Firebase operations
+ * Purpose: Centralized error handling and logging for API calls and Supabase operations
  * Author: ML
  * Date: August 8, 2025
  */

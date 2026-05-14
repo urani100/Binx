@@ -75,7 +75,6 @@
     * Handle recommendations button (R button)
     */
    const handleOpenRecommendations = () => {
-     console.log('R button clicked!')
      showRecommendationsModal()
    }
  
@@ -83,7 +82,6 @@
     * Handle locations button (L button) - NEW
     */
    const handleOpenLocations = () => {
-     console.log('L button clicked!')
      showLocationsModal()
    }
  

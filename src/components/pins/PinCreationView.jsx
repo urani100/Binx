@@ -74,7 +74,6 @@
    
    useEffect(() => {
      if (isOpen) {
-       console.log('📝 Pin creation modal opened - resetting form')
  
        // Reset the main form state
        setNewPin({
@@ -106,7 +105,6 @@
  
        // Clear any existing audio when opening a NEW pin
        if (audioUrl && clearRecording) {
-         console.log('📝 Clearing previous audio recording')
          clearRecording()
        }
      }
@@ -126,7 +124,7 @@
  
    /**
     * Forward geocode: Convert address to coordinates
-    * Uses secure Firebase Functions geocoding endpoint
+    * Uses secure Supabase Edge Function geocoding endpoint
     */
    const searchLocationByAddress = async (address) => {
      if (!address || address.trim().length === 0) {
@@ -255,17 +253,11 @@
          culturalContext: 'Personal discovery'
        }
  
-       console.log('💾 Sending raw data to store:', {
-         ...pinData,
-         audioBlob: audioBlob ? 'Audio blob present' : 'No audio',
-         photo: newPin.photo ? 'Photo data present' : 'No photo'
-       })
  
        // Store handles all complexity - component stays simple
        const result = await addPin(pinData)
  
        if (result && result.success !== false) {
-         console.log('✅ Pin created successfully')
          onClose()
        } else {
          console.error('❌ Store returned error:', result)

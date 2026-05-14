@@ -9,6 +9,7 @@
  import PropTypes from 'prop-types'
  import { useAuth } from '../../hooks/useAuth'
  import { LoadingSpinner } from '../ui'
+ import { DEMO_USER } from '../../utils/constants'
  
  /**
   * AuthView Component
@@ -66,12 +67,7 @@
          result = await register(authForm.email, authForm.password, authForm.name)
        }
  
-       // Success handling is done in the hooks via UI store
-       if (result.success) {
-         console.log('Authentication successful')
-       }
-     } catch (error) {
-       console.error('Authentication error:', error)
+     } catch (_) {
      }
    }
  
@@ -80,18 +76,9 @@
     */
    const handleDemoLogin = async () => {
      setValidationErrors({})
-     const demoCredentials = { 
-       email: 'binx@urania.fm', 
-       password: 'Vibes007', 
-       name: '' 
-     }
-     
-     setAuthForm(demoCredentials)
-     
      try {
-       await login(demoCredentials.email, demoCredentials.password)
-     } catch (error) {
-       console.error('Demo login error:', error)
+       await login(DEMO_USER.email, '')
+     } catch (_) {
      }
    }
  

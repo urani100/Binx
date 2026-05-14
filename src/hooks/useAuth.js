@@ -1,6 +1,6 @@
 /**
  * Authentication Hook for BiNx React App
- * Purpose: Provide clean interface to authentication store and Firebase Auth
+ * Purpose: Provide clean interface to authentication store and Supabase Auth
  * Author: ML
  * Date: August 8, 2025
  */

@@ -22,18 +22,14 @@ import { useLocationStore } from './locationStore'
  * Call this when the app starts
  */
 export const initializeStores = () => {
-  console.log('🏪 Initializing BiNx stores...')
-  
   // Initialize UI first (themes, etc.)
   useUIStore.getState().initializeUI()
-  
+
   // Initialize auth listener
   useAuthStore.getState().initialize()
-  
+
   // Initialize location
   useLocationStore.getState().initializeLocation()
-  
-  console.log('✅ All stores initialized')
 }
 
 /**
@@ -41,21 +37,17 @@ export const initializeStores = () => {
  * Call this when the app unmounts or user logs out
  */
 export const cleanupStores = () => {
-  console.log('🧹 Cleaning up stores...')
-  
   // Cleanup auth listeners
   useAuthStore.getState().cleanup()
-  
+
   // Cleanup pins listeners
   usePinsStore.getState().cleanup()
-  
+
   // Clear location data
   useLocationStore.getState().clearLocation()
-  
+
   // Reset UI state
   useUIStore.getState().resetUI()
-  
-  console.log('✅ All stores cleaned up')
 }
 
 /**
@@ -63,15 +55,11 @@ export const cleanupStores = () => {
  * Call this when user logs in
  */
 export const setupUserStores = (userId) => {
-  console.log('👤 Setting up user stores for:', userId)
-  
   // Initialize pins for this user
   usePinsStore.getState().initializePins(userId)
-  
+
   // Set main view
   useUIStore.getState().navigateToMain()
-  
-  console.log('✅ User stores ready')
 }
 
 /**
@@ -79,15 +67,11 @@ export const setupUserStores = (userId) => {
  * Call this when user logs out
  */
 export const resetUserStores = () => {
-  console.log('🔓 Resetting user stores...')
-  
   // Cleanup pins
   usePinsStore.getState().cleanup()
-  
+
   // Navigate to auth
   useUIStore.getState().navigateToAuth()
-  
-  console.log('✅ User stores reset')
 }
 
 /**

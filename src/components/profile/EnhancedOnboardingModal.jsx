@@ -34,7 +34,6 @@
              
              // Initialize form with existing data if available
              if (user?.profile?.enhancedOnboardingCompleted) {
-                 console.log('🎯 Initializing form with existing enhanced preferences')
                  setPreferences({
                      cuisinePreferences: user.profile.cuisinePreferences || [],
                      activityTypes: user.profile.activityTypes || [],
@@ -132,23 +131,12 @@
          setLoading(true)
          
          try {
-             // Log enhanced preferences for recommendation engine verification
-             console.log('🔍 Enhanced preferences for recommendations:', {
-                 cuisinePreferences: preferences.cuisinePreferences,
-                 activityTypes: preferences.activityTypes,
-                 priceComfort: preferences.priceComfort,
-                 discoveryStyle: preferences.discoveryStyle,
-                 socialPreference: preferences.socialPreference,
-                 aestheticPreferences: preferences.aestheticPreferences,
-                 avoidancePreferences: preferences.avoidancePreferences
-             });
              
              await updateProfile({
                  ...preferences,
                  enhancedOnboardingCompleted: true
              })
              
-             console.log('✅ Enhanced preferences saved for recommendation engine');
              
              // Success - same pattern as basic onboarding
              onComplete?.()

@@ -54,7 +54,7 @@ const LocationsModal = ({ isOpen, onClose }) => {
 
   /**
    * Forward geocode: Convert address to coordinates
-   * Uses secure Firebase Functions geocoding endpoint
+   * Uses secure Supabase Edge Function geocoding endpoint
    * Copied from PinCreationView for independence
    */
   const searchLocationByAddress = async (address) => {
@@ -172,7 +172,6 @@ const LocationsModal = ({ isOpen, onClose }) => {
    * Handle location selection from InteractiveLocationPicker
    */
   const handleLocationChange = async (newLocation) => {
-    console.log('Map location changed to:', newLocation)
     setMapLocation(newLocation)
 
     // Update selected location

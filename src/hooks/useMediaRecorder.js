@@ -45,37 +45,16 @@ export const useMediaRecorder = () => {
    * Start recording with enhanced error handling
    */
   const startRecording = useCallback(async () => {
-    console.log('🎤 === RECORDING DIAGNOSTICS START ===')
-    console.log('🎤 Browser:', navigator.userAgent)
-    console.log('🎤 MediaRecorder supported:', !!window.MediaRecorder)
-    console.log('🎤 getUserMedia supported:', !!navigator.mediaDevices?.getUserMedia)
-
-    // Test MIME type support
-    const testTypes = [
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/mp4',
-      'audio/wav'
-    ]
-
-    testTypes.forEach(type => {
-      const supported = MediaRecorder.isTypeSupported(type)
-      console.log(`🎤 ${type}: ${supported}`)
-    })
-
     if (!isSupported) {
       showMessage('Not Supported', 'Audio recording is not supported in this browser.')
       return { success: false, error: 'Not supported' }
     }
 
     if (isRecording) {
-      console.warn('🎤 Recording already in progress')
       return { success: false, error: 'Already recording' }
     }
 
     try {
-      console.log('🎤 Requesting microphone access...')
-
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -86,17 +65,13 @@ export const useMediaRecorder = () => {
       })
 
       streamRef.current = stream
-      console.log('🎤 Stream obtained:', stream)
-      console.log('🎤 Audio tracks:', stream.getAudioTracks())
-      console.log('🎤 Track settings:', stream.getAudioTracks()[0]?.getSettings())
 
       // Clear previous chunks
       chunksRef.current = []
-      console.log('🎤 Chunks array cleared')
 
       // Determine best MIME type
       const mimeTypes = [
-        'audio/mp4', 
+        'audio/mp4',
         'audio/webm;codecs=opus',
         'audio/webm',
         'audio/mp4',
@@ -115,46 +90,30 @@ export const useMediaRecorder = () => {
         selectedMimeType = 'audio/webm' // Fallback
       }
 
-      console.log('🎤 Selected MIME type:', selectedMimeType)
-
       const recorder = new MediaRecorder(stream, {
         mimeType: selectedMimeType,
         audioBitsPerSecond: 128000
       })
 
-      console.log('🎤 MediaRecorder created with state:', recorder.state)
-
       recorder.ondataavailable = (event) => {
-        console.log('🎤 === DATA AVAILABLE EVENT ===')
-        console.log('🎤 Event data size:', event.data.size)
-        console.log('🎤 Event data type:', event.data.type)
-        console.log('🎤 Event timecode:', event.timecode)
-
         if (event.data.size > 0) {
           chunksRef.current.push(event.data)
-          console.log('🎤 Chunk added. Total chunks:', chunksRef.current.length)
-          console.log('🎤 Total size so far:', chunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0))
         } else {
-          console.error('🎤 ❌ Received EMPTY chunk!')
+          console.error('Received empty audio chunk')
         }
       }
 
       recorder.onstop = () => {
-        console.log('🎤 === RECORDING STOPPED ===')
-        console.log('🎤 Final chunks count:', chunksRef.current.length)
-        console.log('🎤 Final chunks sizes:', chunksRef.current.map(chunk => chunk.size))
-
         if (chunksRef.current.length === 0) {
-          console.error('🎤 ❌ NO CHUNKS COLLECTED!')
+          console.error('No audio chunks recorded')
           showMessage('Recording Error', 'No audio data was recorded. Please try again.')
           return
         }
 
         const totalSize = chunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0)
-        console.log('🎤 Total audio data size:', totalSize)
 
         if (totalSize === 0) {
-          console.error('🎤 ❌ ZERO BYTES COLLECTED!')
+          console.error('Zero bytes recorded')
           showMessage('Recording Error', 'No audio data captured.')
           return
         }
@@ -163,30 +122,20 @@ export const useMediaRecorder = () => {
           type: selectedMimeType
         })
 
-        console.log('🎤 Blob created:', {
-          size: blob.size,
-          type: blob.type,
-          selectedMimeType: selectedMimeType
-        })
-
         if (blob.size === 0) {
-          console.error('🎤 ❌ BLOB IS EMPTY!')
+          console.error('Audio blob is empty')
           showMessage('Recording Error', 'Audio blob creation failed.')
           return
         }
 
         const url = URL.createObjectURL(blob)
-        console.log('🎤 Blob URL created:', url)
 
         setAudioBlob(blob)
         setAudioUrl(url)
 
         // Cleanup stream
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => {
-            track.stop()
-            console.log('🎤 Track stopped:', track.label)
-          })
+          streamRef.current.getTracks().forEach(track => track.stop())
           streamRef.current = null
         }
 
@@ -198,8 +147,7 @@ export const useMediaRecorder = () => {
       }
 
       recorder.onerror = (event) => {
-        console.error('🎤 ❌ MediaRecorder error:', event)
-        console.error('🎤 Error details:', event.error)
+        console.error('MediaRecorder error:', event)
         setIsRecording(false)
         setMediaRecorder(null)
 
@@ -213,32 +161,23 @@ export const useMediaRecorder = () => {
         showMessage('Recording Error', `Recording failed: ${errorMessage}`)
       }
 
-      // Add event listener for when recording actually starts
       recorder.onstart = () => {
-        console.log('🎤 === RECORDING ACTUALLY STARTED ===')
-        console.log('🎤 MediaRecorder state:', recorder.state)
         setIsRecording(true)
         setRecordingDuration(0)
 
-        // Start duration timer here instead
         durationTimerRef.current = setInterval(() => {
           setRecordingDuration(prev => prev + 1)
         }, 1000)
       }
 
-      // Start recording with timeslice to ensure data collection
-      console.log('🎤 Starting recording with 1-second timeslice...')
       recorder.start(1000) // Collect data every 1 second
-      console.log('🎤 recorder.start(1000) called, state:', recorder.state)
 
       setMediaRecorder(recorder)
 
       return { success: true }
 
     } catch (error) {
-      console.error('🎤 ❌ Recording error:', error)
-      console.error('🎤 Error name:', error.name)
-      console.error('🎤 Error message:', error.message)
+      console.error('Recording error:', error)
 
       let errorMessage = 'Microphone access failed: '
 
@@ -274,21 +213,14 @@ export const useMediaRecorder = () => {
   /**
    * Stop recording
    */
-
   const stopRecording = useCallback(() => {
-    console.log('🎤 Stop recording requested...')
-
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       mediaRecorder.stop()
-      console.log('🎤 MediaRecorder.stop() called')
 
       // Stop the stream after stopping the recorder
       setTimeout(() => {
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => {
-            track.stop()
-            console.log('🎤 Track stopped after recording:', track.label)
-          })
+          streamRef.current.getTracks().forEach(track => track.stop())
           streamRef.current = null
         }
       }, 100) // Small delay to ensure recording finishes
@@ -313,7 +245,6 @@ export const useMediaRecorder = () => {
     setAudioBlob(null)
     setRecordingDuration(0)
 
-    console.log('Recording cleared')
     return { success: true }
   }, [audioUrl])
 
@@ -336,36 +267,22 @@ export const useMediaRecorder = () => {
   }, [])
 
 
-  // Cleanup on unmount
   // Cleanup on unmount only
   useEffect(() => {
     return () => {
-      console.log('🎤 Component unmounting, cleaning up...')
-
-      // Stop recording if in progress
       if (mediaRecorder && mediaRecorder.state === 'recording') {
-        console.log('Cleanup: Stopping active recording')
         mediaRecorder.stop()
       }
 
-      // Stop stream
       if (streamRef.current) {
-        console.log('Cleanup: Stopping media stream')
-        streamRef.current.getTracks().forEach(track => {
-          track.stop()
-          console.log('Track stopped:', track.label)
-        })
+        streamRef.current.getTracks().forEach(track => track.stop())
       }
 
-      // Clear timer
       if (durationTimerRef.current) {
-        console.log('Cleanup: Clearing duration timer')
         clearInterval(durationTimerRef.current)
       }
 
-      // Cleanup audio URL
       if (audioUrl && audioUrl.startsWith('blob:')) {
-        console.log('Cleanup: Revoking blob URL:', audioUrl)
         URL.revokeObjectURL(audioUrl)
       }
     }
