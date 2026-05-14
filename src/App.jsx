@@ -49,14 +49,22 @@
    const clearSelectedPin = useUIStore(state => state.clearSelectedPin)
    const hidePinCreationModal = useUIStore(state => state.hidePinCreationModal)
    const hideUserProfileModal = useUIStore(state => state.hideUserProfileModal)
+   const showOnboardingModal = useUIStore(state => state.showOnboardingModal)
    const hideOnboardingModal = useUIStore(state => state.hideOnboardingModal)
    const hideRecommendationsModal = useUIStore(state => state.hideRecommendationsModal)
- 
+
    // Initialize stores on app start
    useEffect(() => {
      initializeStores()
      initialize()
    }, [initialize])
+
+   // Auto-trigger onboarding for new users who haven't completed it
+   useEffect(() => {
+     if (isAuthenticated && user && !user.profile?.onboardingCompleted) {
+       showOnboardingModal()
+     }
+   }, [isAuthenticated, user?.profile?.onboardingCompleted])
  
    /**
     * Handle delete confirmation

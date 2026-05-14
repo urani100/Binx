@@ -70,6 +70,19 @@
      }))
    }
  
+   // Skip onboarding — marks as completed so it won't auto-trigger again
+   const handleSkip = async () => {
+     setLoading(true)
+     try {
+       await updateProfile({ onboardingCompleted: true })
+     } catch (error) {
+       console.error('Skip failed:', error)
+     } finally {
+       setLoading(false)
+       onClose()
+     }
+   }
+
    // Handle form submission - Updated for Save button
    const handleSave = async () => {
      setLoading(true)
@@ -319,8 +332,19 @@
              </button>
            )}
 
-           {/* Spacer to push Save button to the right */}
+           {/* Spacer to push right-side buttons */}
            <div className="flex-1"></div>
+
+           {/* Skip button - only for new users */}
+           {isNewUser && (
+             <button
+               onClick={handleSkip}
+               disabled={loading}
+               className="py-3 px-4 text-gray-400 rounded-xl font-medium transition-colors hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+               Skip
+             </button>
+           )}
 
            {/* Save button - always present, always on the right */}
            <button
