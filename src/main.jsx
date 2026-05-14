@@ -14,7 +14,7 @@ const loadGoogleMaps = () => {
       return;
     }
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDkK930rjzJoTr7xQSWvrd5r3O3N-d2Puw&libraries=geometry,places';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDkK930rjzJoTr7xQSWvrd5r3O3N-d2Puw&libraries=geometry';
     script.async = true;
     script.defer = true;
     script.onload = resolve;
