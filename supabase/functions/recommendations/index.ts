@@ -62,8 +62,8 @@ Deno.serve(async (req) => {
       anthropic.messages.create({
         model: 'claude-sonnet-4-6',
         max_tokens: 1500,
-        system: BINX_SYSTEM_PROMPT,
-        tools: [RECOMMENDATIONS_TOOL],
+        system: [{ type: 'text', text: BINX_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+        tools: [{ ...RECOMMENDATIONS_TOOL, cache_control: { type: 'ephemeral' } }],
         tool_choice: { type: 'tool', name: 'generate_recommendations' },
         messages: [{ role: 'user', content: prompt }],
       }),
