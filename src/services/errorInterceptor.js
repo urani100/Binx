@@ -8,57 +8,29 @@
  import { ERROR_MESSAGES } from '../utils/constants'
 
  /**
-  * Firebase Error Handler
-  * Translates Firebase error codes to user-friendly messages
+  * Supabase Error Handler
+  * Translates Supabase error messages to user-friendly messages
   */
- export const handleFirebaseError = (error) => {
-   console.error('Firebase Error:', error)
- 
-   // Map Firebase error codes to user-friendly messages
-   const errorMappings = {
-     // Auth errors
-     'auth/invalid-email': ERROR_MESSAGES.AUTH.INVALID_EMAIL,
-     'auth/weak-password': ERROR_MESSAGES.AUTH.WEAK_PASSWORD,
-     'auth/user-not-found': ERROR_MESSAGES.AUTH.USER_NOT_FOUND,
-     'auth/wrong-password': ERROR_MESSAGES.AUTH.WRONG_PASSWORD,
-     'auth/email-already-in-use': ERROR_MESSAGES.AUTH.EMAIL_IN_USE,
-     'auth/network-request-failed': ERROR_MESSAGES.AUTH.NETWORK_ERROR,
-     'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
-     'auth/operation-not-allowed': 'This sign-in method is not enabled.',
-     
-     // Firestore errors
-     'firestore/permission-denied': 'Permission denied. Please check your authentication.',
-     'firestore/unavailable': 'Service temporarily unavailable. Please try again.',
-     'firestore/deadline-exceeded': 'Request timed out. Please try again.',
-     'firestore/resource-exhausted': 'Quota exceeded. Please try again later.',
-     
-     // Storage errors
-     'storage/unauthorized': 'Unauthorized access to storage. Please sign in again.',
-     'storage/canceled': 'Upload was canceled.',
-     'storage/unknown': 'Unknown storage error occurred.',
-     'storage/object-not-found': 'File not found.',
-     'storage/bucket-not-found': 'Storage bucket not found.',
-     'storage/project-not-found': 'Project not found.',
-     'storage/quota-exceeded': 'Storage quota exceeded.',
-     'storage/unauthenticated': 'User not authenticated for storage access.',
-     'storage/retry-limit-exceeded': 'Maximum retry limit exceeded.',
-     'storage/invalid-checksum': 'File checksum does not match.',
-     'storage/canceled': 'Operation was canceled.',
-     'storage/invalid-event-name': 'Invalid event name provided.',
-     'storage/invalid-url': 'Invalid URL provided.',
-     'storage/invalid-argument': 'Invalid argument provided.',
-     'storage/no-default-bucket': 'No default storage bucket found.',
-     'storage/cannot-slice-blob': 'Cannot slice blob.',
-     'storage/server-file-wrong-size': 'Server file size mismatch.',
-     
-     // Network errors
-     'network-request-failed': ERROR_MESSAGES.GENERAL.NETWORK_ERROR,
-     'internal-error': 'Internal server error. Please try again.'
-   }
- 
-   // Return mapped error message or default
-   return errorMappings[error.code] || error.message || ERROR_MESSAGES.GENERAL.UNKNOWN_ERROR
+ export const handleSupabaseError = (error) => {
+   console.error('Supabase Error:', error)
+
+   const message = error?.message || ''
+
+   if (message.includes('Invalid login credentials')) return ERROR_MESSAGES.AUTH.WRONG_PASSWORD
+   if (message.includes('Email not confirmed')) return 'Please verify your email before logging in.'
+   if (message.includes('User already registered')) return ERROR_MESSAGES.AUTH.EMAIL_IN_USE
+   if (message.includes('Password should be at least')) return ERROR_MESSAGES.AUTH.WEAK_PASSWORD
+   if (message.includes('Unable to validate email') || message.includes('invalid email')) return ERROR_MESSAGES.AUTH.INVALID_EMAIL
+   if (message.includes('Too many requests')) return 'Too many failed attempts. Please try again later.'
+   if (message.includes('not authorized') || error?.statusCode === 403) return 'Permission denied. Please check your authentication.'
+   if (message.includes('timed out') || message.includes('deadline')) return 'Request timed out. Please try again.'
+   if (message.includes('network') || message.includes('fetch')) return ERROR_MESSAGES.GENERAL.NETWORK_ERROR
+
+   return message || ERROR_MESSAGES.GENERAL.UNKNOWN_ERROR
  }
+
+ /** @deprecated Use handleSupabaseError instead */
+ export const handleFirebaseError = handleSupabaseError
  
  /**
   * API Error Handler
@@ -198,9 +170,7 @@
        logError(error, context)
        
        // Determine error type and handle appropriately
-       if (error.code && error.code.startsWith('auth/')) {
-         throw new Error(handleFirebaseError(error))
-       } else if (error.name && ['NotAllowedError', 'NotFoundError', 'NotSupportedError'].includes(error.name)) {
+       if (error.name && ['NotAllowedError', 'NotFoundError', 'NotSupportedError'].includes(error.name)) {
          throw new Error(handleMediaError(error))
        } else if (error.code && [1, 2, 3].includes(error.code)) {
          throw new Error(handleLocationError(error))

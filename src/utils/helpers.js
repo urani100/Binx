@@ -109,24 +109,6 @@
  }
  
  /**
-  * Upload file to Firebase Storage
-  */
- export const uploadFileToFirebase = async (file, path) => {
-   if (!window.firebase || !file) return null
- 
-   try {
-     const storageRef = window.firebase.ref(window.firebase.storage, path)
-     const snapshot = await window.firebase.uploadBytes(storageRef, file)
-     const downloadURL = await window.firebase.getDownloadURL(snapshot.ref)
-     console.log('✅ File uploaded:', downloadURL)
-     return downloadURL
-   } catch (error) {
-     console.error('❌ Upload failed:', error)
-     return null
-   }
- }
- 
- /**
   * Email validation
   */
  export const validateEmail = (email) => {

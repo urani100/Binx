@@ -1,144 +1,103 @@
-/**
- * Pins Store for BiNx React App
- * Purpose: Manage pins state with Firebase Firestore integration
- * Author: ML
- * Date: August 8, 2025
- */
-
 import { create } from 'zustand'
-import {
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
-} from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
-
-
-import { db, storage, auth } from '../services/firebase'
+import { supabase } from '../services/supabase'
 import { DEMO_USER, DEMO_PINS } from '../utils/constants'
 import { sortPinsByTimestamp, dataURLtoFile, blobToFile } from '../utils/helpers'
-import { handleFirebaseError } from '../services/errorInterceptor'
+import { handleSupabaseError } from '../services/errorInterceptor'
 
-
-/**
- * File Upload Helper
- * Uploads files to Firebase Storage with proper error handling
- * FIXED: Added auth verification before upload 08/21/25
- */
- const uploadFileToFirebase = async (file, path) => {
+const uploadFileToBucket = async (file, bucket, path) => {
   if (!file) return null
 
   try {
-    // CRITICAL FIX: Verify auth state before upload
-    if (!auth.currentUser) {
-      throw new Error('Authentication required. Please sign in again.')
-    }
+    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+    if (error) throw error
 
-    // Verify token is still valid
-    await auth.currentUser.getIdToken(false)
-
-    const storageRef = ref(storage, path)
-    const snapshot = await uploadBytes(storageRef, file)
-    const downloadURL = await getDownloadURL(snapshot.ref)
-
-    console.log('✅ File uploaded to:', downloadURL)
-    return downloadURL
+    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
+    return publicUrl
   } catch (error) {
-    console.error('❌ File upload failed:', error)
-    
-    // Enhanced error context for auth issues
-    if (error.code === 'storage/unauthorized' || error.code === 'storage/unauthenticated') {
+    console.error('File upload failed:', error)
+    if (error.message?.includes('not authorized') || error.statusCode === 403) {
       throw new Error('Storage access denied. Please sign in again.')
     }
-    
     throw error
   }
 }
 
-/**
- * Pins Store
- * Manages pins collection with real-time Firebase sync
- */
+const mapPin = (pin) => ({
+  ...pin,
+  culturalContext: pin.cultural_context,
+  audioUrl: pin.audio_url,
+  timestamp: pin.timestamp ? new Date(pin.timestamp) : new Date()
+})
+
 export const usePinsStore = create((set, get) => ({
-  // State
   pins: [],
   loading: false,
   error: null,
-  unsubscribe: null,
+  channel: null,
   currentUserId: null,
 
-  // Actions
+  initializePins: async (userId) => {
+    const { channel: currentChannel, currentUserId } = get()
 
-  /**
-   * Initialize pins listener for a user
-   */
-  initializePins: (userId) => {
-    const { unsubscribe: currentUnsubscribe, currentUserId } = get()
-
-    // Cleanup existing listener if user changed
-    if (currentUnsubscribe && currentUserId !== userId) {
-      currentUnsubscribe()
+    if (currentChannel && currentUserId !== userId) {
+      supabase.removeChannel(currentChannel)
     }
 
-    if (currentUserId === userId) return // Already initialized for this user
+    if (currentUserId === userId) return
 
     set({ loading: true, currentUserId: userId, error: null })
 
     if (userId === DEMO_USER.id) {
-      // Demo user - use local demo data
-      set({
-        pins: sortPinsByTimestamp(DEMO_PINS),
-        loading: false,
-        unsubscribe: null
-      })
+      set({ pins: sortPinsByTimestamp(DEMO_PINS), loading: false, channel: null })
       return
     }
 
     if (!userId) {
-      // No user - clear pins
-      set({ pins: [], loading: false, unsubscribe: null, currentUserId: null })
+      set({ pins: [], loading: false, channel: null, currentUserId: null })
       return
     }
 
-    // Real user - set up Firestore listener
     try {
-      const pinsCollection = collection(db, 'users', userId, 'pins')
-      const pinsQuery = query(pinsCollection, orderBy('timestamp', 'desc'))
+      const { data, error } = await supabase
+        .from('pins')
+        .select('*')
+        .eq('user_id', userId)
+        .order('timestamp', { ascending: false })
 
-      const unsubscribe = onSnapshot(
-        pinsQuery,
-        (snapshot) => {
-          const pinsData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            timestamp: doc.data().timestamp?.toDate() || new Date()
-          }))
+      if (error) throw error
 
-          set({ pins: pinsData, loading: false, error: null })
-        },
-        (error) => {
-          console.error('Pins listener error:', error)
-          const errorMessage = handleFirebaseError(error)
-          set({ error: errorMessage, loading: false })
-        }
-      )
+      set({ pins: (data || []).map(mapPin), loading: false })
 
-      set({ unsubscribe })
+      const channel = supabase
+        .channel(`pins:${userId}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'pins',
+          filter: `user_id=eq.${userId}`
+        }, (payload) => {
+          const { pins: current } = get()
+          set({ pins: sortPinsByTimestamp([...current, mapPin(payload.new)]) })
+        })
+        .on('postgres_changes', {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'pins',
+          filter: `user_id=eq.${userId}`
+        }, (payload) => {
+          const { pins: current } = get()
+          set({ pins: current.filter(p => p.id !== payload.old.id) })
+        })
+        .subscribe()
+
+      set({ channel })
 
     } catch (error) {
-      const errorMessage = handleFirebaseError(error)
+      const errorMessage = handleSupabaseError(error)
       set({ error: errorMessage, loading: false })
     }
   },
 
-  /**
-   * Add new pin
-   */
   addPin: async (newPin) => {
     const { currentUserId } = get()
     if (!currentUserId) throw new Error('No user logged in')
@@ -147,7 +106,6 @@ export const usePinsStore = create((set, get) => ({
 
     try {
       if (currentUserId === DEMO_USER.id) {
-        // Demo user - add to local state
         const pin = {
           ...newPin,
           id: Date.now().toString(),
@@ -155,78 +113,57 @@ export const usePinsStore = create((set, get) => ({
           timestamp: new Date(),
           culturalContext: newPin.culturalContext || 'Personal discovery'
         }
-
         const { pins } = get()
-        const updatedPins = sortPinsByTimestamp([...pins, pin])
-        set({ pins: updatedPins, loading: false })
-
+        set({ pins: sortPinsByTimestamp([...pins, pin]), loading: false })
         return { success: true }
       }
 
-      // Real user - process uploads and save to Firestore
+      const pinId = crypto.randomUUID()
       let uploadedPhotoUrl = null
       let uploadedAudioUrl = null
-      const pinId = Date.now().toString()
 
-      // Upload photo if exists
       if (newPin.photo && typeof newPin.photo === 'string' && newPin.photo.startsWith('data:')) {
-        const photoFile = dataURLtoFile(newPin.photo, `pin-photo-${pinId}.jpg`)
-        const photoPath = `users/${currentUserId}/pins/${pinId}/photo.jpg`
-        uploadedPhotoUrl = await uploadFileToFirebase(photoFile, photoPath)
+        const photoFile = dataURLtoFile(newPin.photo, `photo-${pinId}.jpg`)
+        uploadedPhotoUrl = await uploadFileToBucket(photoFile, 'pin-assets', `${currentUserId}/${pinId}/photo.jpg`)
       } else if (newPin.photo) {
         uploadedPhotoUrl = newPin.photo
       }
 
-
       if (newPin.audioBlob) {
-        // More robust extension detection for cross-platform compatibility
-        let extension = 'm4a' // Default for iOS
-        
-        if (newPin.audioBlob.type.includes('webm')) {
-          extension = 'webm'
-        } else if (newPin.audioBlob.type.includes('mp4')) {
-          extension = 'm4a'
-        } else if (newPin.audioBlob.type.includes('wav')) {
-          extension = 'wav'
-        }
-        
-        console.log('📱 Audio upload - Type:', newPin.audioBlob.type, 'Extension:', extension)
-        
-        const audioFile = blobToFile(newPin.audioBlob, `pin-audio-${pinId}.${extension}`)
-        const audioPath = `users/${currentUserId}/pins/${pinId}/audio.${extension}`
-        uploadedAudioUrl = await uploadFileToFirebase(audioFile, audioPath)
+        let extension = 'm4a'
+        if (newPin.audioBlob.type.includes('webm')) extension = 'webm'
+        else if (newPin.audioBlob.type.includes('wav')) extension = 'wav'
+
+        const audioFile = blobToFile(newPin.audioBlob, `audio-${pinId}.${extension}`)
+        uploadedAudioUrl = await uploadFileToBucket(audioFile, 'pin-assets', `${currentUserId}/${pinId}/audio.${extension}`)
       }
 
-      // Create pin document
-      const pin = {
-        ...newPin,
-        userId: currentUserId,
-        timestamp: serverTimestamp(),
-        culturalContext: newPin.culturalContext || 'Personal discovery',
+      const pinData = {
+        id: pinId,
+        user_id: currentUserId,
+        title: newPin.title,
+        note: newPin.note,
+        mood: newPin.mood,
+        location: newPin.location,
+        cultural_context: newPin.culturalContext || 'Personal discovery',
         photo: uploadedPhotoUrl,
-        audioUrl: uploadedAudioUrl
+        audio_url: uploadedAudioUrl,
+        timestamp: new Date().toISOString()
       }
 
-      // Remove client-side properties
-      delete pin.audioBlob
-
-      // Add to Firestore
-      const pinsCollection = collection(db, 'users', currentUserId, 'pins')
-      await addDoc(pinsCollection, pin)
+      const { error } = await supabase.from('pins').insert(pinData)
+      if (error) throw error
 
       set({ loading: false })
       return { success: true }
 
     } catch (error) {
-      const errorMessage = handleFirebaseError(error)
+      const errorMessage = handleSupabaseError(error)
       set({ error: errorMessage, loading: false })
       return { success: false, error: errorMessage }
     }
   },
 
-  /**
-   * Delete pin
-   */
   deletePin: async (pinId) => {
     const { currentUserId, pins } = get()
     if (!currentUserId) throw new Error('No user logged in')
@@ -235,36 +172,32 @@ export const usePinsStore = create((set, get) => ({
 
     try {
       if (currentUserId === DEMO_USER.id) {
-        // Demo user - remove from local state
-        const updatedPins = pins.filter(pin => pin.id !== pinId)
-        set({ pins: updatedPins, loading: false })
+        set({ pins: pins.filter(p => p.id !== pinId), loading: false })
         return { success: true }
       }
 
-      // Real user - delete from Firestore and Storage
       const pin = pins.find(p => p.id === pinId)
 
-      // Delete document from Firestore
-      await deleteDoc(doc(db, 'users', currentUserId, 'pins', pinId))
+      const { error } = await supabase
+        .from('pins')
+        .delete()
+        .eq('id', pinId)
+        .eq('user_id', currentUserId)
+      if (error) throw error
 
-      // Delete associated files from Storage (background operation)
       if (pin) {
-        const basePath = `users/${currentUserId}/pins/${pinId}`
-
-        if (pin.photo) {
-          try {
-            await deleteObject(ref(storage, `${basePath}/photo.jpg`))
-          } catch (error) {
-            console.warn('Photo file not found in storage:', error)
-          }
-        }
-
+        const basePath = `${currentUserId}/${pinId}`
+        const filesToDelete = []
+        if (pin.photo) filesToDelete.push(`${basePath}/photo.jpg`)
         if (pin.audioUrl) {
-          try {
-            await deleteObject(ref(storage, `${basePath}/audio.m4a`))
-          } catch (error) {
-            console.warn('Audio file not found in storage:', error)
-          }
+          filesToDelete.push(
+            `${basePath}/audio.m4a`,
+            `${basePath}/audio.webm`,
+            `${basePath}/audio.wav`
+          )
+        }
+        if (filesToDelete.length) {
+          supabase.storage.from('pin-assets').remove(filesToDelete).catch(console.warn)
         }
       }
 
@@ -272,66 +205,35 @@ export const usePinsStore = create((set, get) => ({
       return { success: true }
 
     } catch (error) {
-      const errorMessage = handleFirebaseError(error)
+      const errorMessage = handleSupabaseError(error)
       set({ error: errorMessage, loading: false })
       return { success: false, error: errorMessage }
     }
   },
 
-  /**
-   * Get pin by ID
-   */
-  getPinById: (pinId) => {
-    const { pins } = get()
-    return pins.find(pin => pin.id === pinId)
-  },
+  getPinById: (pinId) => get().pins.find(pin => pin.id === pinId),
 
-  /**
-   * Filter pins by mood
-   */
-  getPinsByMood: (mood) => {
-    const { pins } = get()
-    return pins.filter(pin => pin.mood === mood)
-  },
+  getPinsByMood: (mood) => get().pins.filter(pin => pin.mood === mood),
 
-  /**
-   * Search pins
-   */
   searchPins: (searchTerm) => {
     const { pins } = get()
     if (!searchTerm) return pins
-
     const term = searchTerm.toLowerCase()
     return pins.filter(pin =>
-      pin.title.toLowerCase().includes(term) ||
-      pin.note.toLowerCase().includes(term) ||
-      pin.location.name.toLowerCase().includes(term) ||
+      pin.title?.toLowerCase().includes(term) ||
+      pin.note?.toLowerCase().includes(term) ||
+      pin.location?.name?.toLowerCase().includes(term) ||
       pin.culturalContext?.toLowerCase().includes(term)
     )
   },
 
-  /**
-   * Get pins count
-   */
-  getPinsCount: () => {
-    const { pins } = get()
-    return pins.length
-  },
+  getPinsCount: () => get().pins.length,
 
-  /**
-   * Clear error
-   */
   clearError: () => set({ error: null }),
 
-  /**
-   * Cleanup
-   */
   cleanup: () => {
-    const { unsubscribe } = get()
-    if (unsubscribe) {
-      unsubscribe()
-      set({ unsubscribe: null })
-    }
-    set({ pins: [], currentUserId: null, loading: false, error: null })
+    const { channel } = get()
+    if (channel) supabase.removeChannel(channel)
+    set({ pins: [], currentUserId: null, loading: false, error: null, channel: null })
   }
 }))
