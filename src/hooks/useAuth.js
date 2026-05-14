@@ -108,13 +108,11 @@
      })
  
      const result = await updateProfile(sanitizedData)
-     
-     if (result?.success) {
-       showMessage('Success', 'Profile updated successfully!')
-     } else if (result?.error) {
+
+     if (result?.error) {
        showMessage('Update Failed', result.error)
      }
- 
+
      return result
    }
  
