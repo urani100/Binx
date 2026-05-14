@@ -9,6 +9,7 @@
  import { API_ENDPOINTS, APP_CONFIG } from '../utils/constants'
  import { getCurrentLocation } from '../utils/helpers'
  import { handleApiError, handleLocationError, withErrorHandling } from '../services/errorInterceptor'
+ import { edgeFunctionHeaders } from '../services/supabase'
  
  /**
   * Location Store
@@ -46,7 +47,8 @@
        // Fetch weather data from secure endpoint
        try {
          const weatherResponse = await fetch(
-           `${API_ENDPOINTS.WEATHER}?lat=${coords.lat}&lng=${coords.lng}`
+           `${API_ENDPOINTS.WEATHER}?lat=${coords.lat}&lng=${coords.lng}`,
+           { headers: edgeFunctionHeaders }
          )
  
          if (!weatherResponse.ok) {
@@ -67,7 +69,8 @@
        // Reverse geocode to get location info from secure endpoint
        try {
          const geocodeResponse = await fetch(
-           `${API_ENDPOINTS.GEOCODE}?lat=${coords.lat}&lng=${coords.lng}`
+           `${API_ENDPOINTS.GEOCODE}?lat=${coords.lat}&lng=${coords.lng}`,
+           { headers: edgeFunctionHeaders }
          )
  
          if (!geocodeResponse.ok) {
@@ -166,7 +169,8 @@
        // Fetch weather for new coordinates
        try {
          const weatherResponse = await fetch(
-           `${API_ENDPOINTS.WEATHER}?lat=${coords.lat}&lng=${coords.lng}`
+           `${API_ENDPOINTS.WEATHER}?lat=${coords.lat}&lng=${coords.lng}`,
+           { headers: edgeFunctionHeaders }
          )
  
          if (weatherResponse.ok) {
@@ -182,7 +186,8 @@
        // Reverse geocode new coordinates
        try {
          const geocodeResponse = await fetch(
-           `${API_ENDPOINTS.GEOCODE}?lat=${coords.lat}&lng=${coords.lng}`
+           `${API_ENDPOINTS.GEOCODE}?lat=${coords.lat}&lng=${coords.lng}`,
+           { headers: edgeFunctionHeaders }
          )
  
          if (geocodeResponse.ok) {

@@ -18,6 +18,7 @@ import { useLocation } from '../../hooks/useLocation'
 import { useUIStore } from '../../store/uiStore'
 import { InteractiveLocationPicker } from '../shared'
 import { API_ENDPOINTS } from '../../utils/constants'
+import { edgeFunctionHeaders } from '../../services/supabase'
 
 /**
  * LocationsModal Component
@@ -66,7 +67,7 @@ const LocationsModal = ({ isOpen, onClose }) => {
 
     try {
       const url = `${API_ENDPOINTS.GEOCODE}?address=${encodeURIComponent(address.trim())}`
-      const response = await fetch(url)
+      const response = await fetch(url, { headers: edgeFunctionHeaders })
       const data = await response.json()
 
       if (data.results && data.results.length > 0) {

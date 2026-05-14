@@ -7,6 +7,7 @@ import { useUIStore } from '../../store/uiStore'
 import { useLocationStore } from '../../store/locationStore'
 import { LoadingSpinner } from '../ui'
 import { API_ENDPOINTS } from '../../utils/constants'
+import { edgeFunctionHeaders } from '../../services/supabase'
 
 const RecommendationsModal = ({ isOpen, onClose }) => {
     const { user } = useAuth()
@@ -143,7 +144,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
 
             const response = await fetch(API_ENDPOINTS.RECOMMENDATIONS, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: edgeFunctionHeaders,
                 body: JSON.stringify(requestData)
             })
 
