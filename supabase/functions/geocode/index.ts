@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
     const response = await fetch(geocodeUrl)
     const data = await response.json()
 
-    if (data.error_message) {
-      return new Response(JSON.stringify({ error: data.error_message }), {
+    if (data.error_message || data.status === 'REQUEST_DENIED' || data.status === 'INVALID_REQUEST') {
+      return new Response(JSON.stringify({ error: data.error_message, status: data.status }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

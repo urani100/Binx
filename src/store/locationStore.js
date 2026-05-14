@@ -73,10 +73,11 @@
            { headers: edgeFunctionHeaders }
          )
  
-         if (!geocodeResponse.ok) {
-           throw new Error(`Geocoding API error: ${geocodeResponse.status}`)
+        if (!geocodeResponse.ok) {
+           const errData = await geocodeResponse.json().catch(() => ({}))
+           throw new Error(`Geocoding API error: ${geocodeResponse.status} — ${errData.status || ''} ${errData.error || ''}`.trim())
          }
- 
+
          const geocodeData = await geocodeResponse.json()
          
          if (geocodeData.results && geocodeData.results.length > 0) {
