@@ -16,7 +16,7 @@
  import { usePinsStore } from '../../store/pinsStore'
  import { VibeTag } from '../ui'
  import { CustomAudioPlayer } from '../shared'
- import { VIBES } from '../../utils/constants'
+ import { VIBES, API_ENDPOINTS } from '../../utils/constants'
  import { InteractiveLocationPicker } from '../shared'
  
  
@@ -59,40 +59,13 @@
    const [isSearchingLocation, setIsSearchingLocation] = useState(false) // Location search
    const [mapLocation, setMapLocation] = useState(null) // For map marker position
  
-   /**
-    * Initialize location name when userLocation changes
-    * Uses secure Firebase Functions geocoding endpoint
-    * Updated: August 9, 2025 - Maintained original functionality
-    */
+   // Sync location name from store whenever userLocation changes.
+   // locationStore already reverse-geocodes on init, so we read address directly.
    useEffect(() => {
-     const reverseGeocode = async () => {
-       if (userLocation && userLocation.lat && userLocation.lng) {
-         setIsLocationLoading(true)
- 
-         // Use secure Firebase Functions geocoding endpoint
-         const url = `https://us-east1-binx-3a213.cloudfunctions.net/api/geocode?lat=${userLocation.lat}&lng=${userLocation.lng}`
- 
-         try {
-           const response = await fetch(url)
-           const data = await response.json()
- 
-           if (data.results && data.results.length > 0) {
-             setLocationName(data.results[0].formatted_address)
-           } else {
-             setLocationName('Unknown Location')
-           }
-         } catch (error) {
-           console.error('Error during reverse geocoding:', error)
-           setLocationName('Could not determine location name')
-           showMessage('Location Error', 'Failed to get location name from our server. Please enter manually.')
-         } finally {
-           setIsLocationLoading(false)
-         }
-       }
+     if (userLocation?.address) {
+       setLocationName(userLocation.address)
      }
- 
-     reverseGeocode()
-   }, [userLocation, showMessage])
+   }, [userLocation])
     
    /**
     * Reset form and force current location display when modal opens
@@ -116,27 +89,11 @@
        setSelectedVibe(VIBES[0])
        setMapLocation(null) // Reset map location to use current GPS
        
-       // Force current location name to be set immediately
-       if (userLocation && userLocation.lat && userLocation.lng) {
-         setIsLocationLoading(true)
-         const reverseGeocodeCurrentLocation = async () => {
-           try {
-             const url = `https://us-east1-binx-3a213.cloudfunctions.net/api/geocode?lat=${userLocation.lat}&lng=${userLocation.lng}`
-             const response = await fetch(url)
-             const data = await response.json()
-             
-             if (data.results && data.results.length > 0) {
-               setLocationName(data.results[0].formatted_address)
-             } else {
-               setLocationName('Current Location')
-             }
-           } catch (error) {
-             setLocationName('Current Location')
-           } finally {
-             setIsLocationLoading(false)
-           }
-         }
-         reverseGeocodeCurrentLocation()
+       // Use already-geocoded address from locationStore — no API call needed
+       if (userLocation?.address) {
+         setLocationName(userLocation.address)
+       } else if (userLocation) {
+         setLocationName('Current Location')
        } else {
          setLocationName('Getting location...')
        }
@@ -179,7 +136,7 @@
      setIsSearchingLocation(true)
  
      try {
-       const url = `https://us-east1-binx-3a213.cloudfunctions.net/api/geocode?address=${encodeURIComponent(address.trim())}`
+       const url = `${API_ENDPOINTS.GEOCODE}?address=${encodeURIComponent(address.trim())}`
        const response = await fetch(url)
        const data = await response.json()
  

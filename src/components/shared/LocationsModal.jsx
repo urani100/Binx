@@ -17,6 +17,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useLocation } from '../../hooks/useLocation'
 import { useUIStore } from '../../store/uiStore'
 import { InteractiveLocationPicker } from '../shared'
+import { API_ENDPOINTS } from '../../utils/constants'
 
 /**
  * LocationsModal Component
@@ -33,7 +34,6 @@ const LocationsModal = ({ isOpen, onClose }) => {
 
   // Independent location state (separate from PinCreationView)
   const [locationName, setLocationName] = useState('')
-  const [isLocationLoading, setIsLocationLoading] = useState(false)
   const [isSearchingLocation, setIsSearchingLocation] = useState(false)
   const [mapLocation, setMapLocation] = useState(null) // For map marker position
   const [selectedLocation, setSelectedLocation] = useState(null) // Currently selected location
@@ -65,7 +65,7 @@ const LocationsModal = ({ isOpen, onClose }) => {
     setIsSearchingLocation(true)
 
     try {
-      const url = `https://us-east1-binx-3a213.cloudfunctions.net/api/geocode?address=${encodeURIComponent(address.trim())}`
+      const url = `${API_ENDPOINTS.GEOCODE}?address=${encodeURIComponent(address.trim())}`
       const response = await fetch(url)
       const data = await response.json()
 
@@ -87,66 +87,23 @@ const LocationsModal = ({ isOpen, onClose }) => {
     }
   }
 
-  /**
-   * Reverse geocode: Convert coordinates to address
-   * Uses secure Firebase Functions geocoding endpoint
-   */
-  const reverseGeocode = async (lat, lng) => {
-    setIsLocationLoading(true)
-
-    try {
-      const url = `https://us-east1-binx-3a213.cloudfunctions.net/api/geocode?lat=${lat}&lng=${lng}`
-      const response = await fetch(url)
-      const data = await response.json()
-
-      if (data.results && data.results.length > 0) {
-        return data.results[0].formatted_address
-      } else {
-        return 'Unknown Location'
-      }
-    } catch (error) {
-      console.error('Error during reverse geocoding:', error)
-      return 'Could not determine location name'
-    } finally {
-      setIsLocationLoading(false)
-    }
-  }
-
-  /**
-   * Initialize location name when userLocation changes or modal opens
-   */
+  // Initialize location name when modal opens.
+  // locationStore already reverse-geocodes on init, so we read address directly.
   useEffect(() => {
-    const initializeLocation = async () => {
-      if (isOpen && userLocation && userLocation.lat && userLocation.lng) {
-        console.log('🗺️ LocationsModal opened - initializing current location')
+    if (!isOpen) return
 
-        // Reset map location to use current GPS
-        setMapLocation(null)
+    setMapLocation(null)
 
-        // Get current location name
-        try {
-          const address = await reverseGeocode(userLocation.lat, userLocation.lng)
-          setLocationName(address)
-          setSelectedLocation({
-            name: address,
-            lat: userLocation.lat,
-            lng: userLocation.lng
-          })
-        } catch (error) {
-          setLocationName('Current Location')
-          setSelectedLocation({
-            name: 'Current Location',
-            lat: userLocation.lat,
-            lng: userLocation.lng
-          })
-        }
-      } else if (isOpen) {
-        setLocationName('Getting location...')
-        setSelectedLocation(null)
-      }
+    if (userLocation?.address) {
+      setLocationName(userLocation.address)
+      setSelectedLocation({ name: userLocation.address, lat: userLocation.lat, lng: userLocation.lng })
+    } else if (userLocation) {
+      setLocationName('Current Location')
+      setSelectedLocation({ name: 'Current Location', lat: userLocation.lat, lng: userLocation.lng })
+    } else {
+      setLocationName('Getting location...')
+      setSelectedLocation(null)
     }
-
-    initializeLocation()
   }, [isOpen, userLocation])
 
   /**
@@ -250,26 +207,12 @@ const LocationsModal = ({ isOpen, onClose }) => {
       return
     }
 
-    setMapLocation(null) // Reset to current GPS
+    setMapLocation(null)
 
-    try {
-      const address = await reverseGeocode(userLocation.lat, userLocation.lng)
-      setLocationName(address)
-      setSelectedLocation({
-        name: address,
-        lat: userLocation.lat,
-        lng: userLocation.lng
-      })
-
-      showMessage('Location Updated', 'Using your current location.')
-    } catch (error) {
-      setLocationName('Current Location')
-      setSelectedLocation({
-        name: 'Current Location',
-        lat: userLocation.lat,
-        lng: userLocation.lng
-      })
-    }
+    const address = userLocation.address || 'Current Location'
+    setLocationName(address)
+    setSelectedLocation({ name: address, lat: userLocation.lat, lng: userLocation.lng })
+    showMessage('Location Updated', 'Using your current location.')
   }
 
   // Don't render if modal is not open
@@ -323,10 +266,8 @@ const LocationsModal = ({ isOpen, onClose }) => {
               disabled={isSearchingLocation}
             />
 
-            {(isLocationLoading || isSearchingLocation) && (
-              <p className="text-xs text-gray-500 mt-2">
-                {isLocationLoading ? 'Loading location...' : 'Searching address...'}
-              </p>
+            {isSearchingLocation && (
+              <p className="text-xs text-gray-500 mt-2">Searching address...</p>
             )}
           </div>
 
