@@ -14,6 +14,7 @@
  import { UserType } from '../../types'
  import { PALETTES, GUIDES } from '../../utils/constants'
  import { EnhancedOnboardingModal } from './index'
+ import { SavedLocationsModal } from '../shared'
  
  /**
   * UserProfileView Component - EXACT REPLICA
@@ -23,6 +24,7 @@
    const { user, logout, updateProfilePicture, removeProfilePicture } = useAuth()
    const { pins } = usePins()
    const [showEnhancedOnboarding, setShowEnhancedOnboarding] = useState(false)
+   const [showSavedLocations, setShowSavedLocations] = useState(false)
  
    // UI Store for theme management
    const selectedPaletteName = useUIStore(state => state.selectedPaletteName)
@@ -352,12 +354,20 @@
           <h3 className="text-xl font-semibold text-customPurpleText mb-4">What's your vibe?</h3>
            <h4 className="text-l text-gray-700  mt-4">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
            
-           <button
-             onClick={() => setShowEnhancedOnboarding(true)}
-             className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-           >
-             Personalize BiNx
-           </button>
+           <div className="flex gap-3">
+             <button
+               onClick={() => setShowEnhancedOnboarding(true)}
+               className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+             >
+               Personalize BiNx
+             </button>
+             <button
+               onClick={() => setShowSavedLocations(true)}
+               className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+             >
+               Saved Locations
+             </button>
+           </div>
          </div>
        </div>
        
@@ -366,6 +376,12 @@
          isOpen={showEnhancedOnboarding}
          onClose={() => setShowEnhancedOnboarding(false)}
          onComplete={() => setShowEnhancedOnboarding(false)}
+       />
+
+       {/* Saved Locations Modal */}
+       <SavedLocationsModal
+         isOpen={showSavedLocations}
+         onClose={() => setShowSavedLocations(false)}
        />
      </div>
    )

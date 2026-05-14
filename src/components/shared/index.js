@@ -12,6 +12,8 @@
  export { default as InteractiveLocationPicker } from './InteractiveLocationPicker'
  export { default as RecommendationsModal } from './RecommendationsModal'
  export { default as LocationsModal } from './LocationsModal'
+ export { default as SavedLocationsModal } from './SavedLocationsModal'
+ export { default as RecommendationCard } from './RecommendationCard'
 
 
 

@@ -56,7 +56,8 @@ export const useAuthStore = create(
                 socialPreference: 'intimate-pairs',
                 aestheticPreferences: [],
                 avoidancePreferences: [],
-                enhancedOnboardingCompleted: false
+                enhancedOnboardingCompleted: false,
+                savedLocations: []
               }
             }
 
@@ -108,7 +109,8 @@ export const useAuthStore = create(
                   socialPreference: saved.socialPreference || 'intimate-pairs',
                   aestheticPreferences: saved.aestheticPreferences || [],
                   avoidancePreferences: saved.avoidancePreferences || [],
-                  enhancedOnboardingCompleted: saved.enhancedOnboardingCompleted || false
+                  enhancedOnboardingCompleted: saved.enhancedOnboardingCompleted || false,
+                  savedLocations: saved.savedLocations || []
                 }
               },
               profileLoaded: true

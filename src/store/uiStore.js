@@ -274,6 +274,15 @@ export const useUIStore = create(
         })
       },
 
+      seedSavedLocations: (locations) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            savedRecommendations: locations
+          }
+        })
+      },
+
       clearRecommendations: () => {
         set({
           recommendationsModal: {
