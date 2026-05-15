@@ -42,6 +42,7 @@
    
    // State for enhanced onboarding
    const [showEnhancedOnboarding, setShowEnhancedOnboarding] = useState(false)
+   const [cursorPos, setCursorPos] = useState({ x: -200, y: -200 })
  
    // UI Store actions
    const hideMessageModal = useUIStore(state => state.hideMessageModal)
@@ -68,14 +69,19 @@
      }
    }, [isAuthenticated, profileLoaded, user?.profile?.onboardingCompleted])
 
-   // Set cursor to selected avatar
+   // Floating avatar cursor
    useEffect(() => {
-     if (isAuthenticated && selectedGuideName) {
-       document.body.style.cursor = `url(images/${selectedGuideName.toLowerCase()}.svg) 16 16, auto`
-     } else {
+     if (!isAuthenticated || !selectedGuideName) {
+       document.body.style.cursor = 'auto'
+       return
+     }
+     document.body.style.cursor = 'none'
+     const move = (e) => setCursorPos({ x: e.clientX, y: e.clientY })
+     window.addEventListener('mousemove', move)
+     return () => {
+       window.removeEventListener('mousemove', move)
        document.body.style.cursor = 'auto'
      }
-     return () => { document.body.style.cursor = 'auto' }
    }, [isAuthenticated, selectedGuideName])
 
    // Seed saved locations from profile into UI store after profile loads
@@ -148,6 +154,23 @@
    return (
      <ErrorBoundary>
        <MainView />
+
+       {/* Floating avatar cursor */}
+       {isAuthenticated && selectedGuideName && (
+         <img
+           src={`images/${selectedGuideName.toLowerCase()}.svg`}
+           alt=""
+           style={{
+             position: 'fixed',
+             left: cursorPos.x,
+             top: cursorPos.y,
+             width: '60px',
+             pointerEvents: 'none',
+             zIndex: 99999,
+             transform: 'translate(-50%, -100%)',
+           }}
+         />
+       )}
        {/* Global Modals */}
        <MessageModal
          isOpen={messageModal.isOpen}
