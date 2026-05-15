@@ -343,7 +343,7 @@
                    key={cat}
                    type="button"
                    onClick={() => setActiveCategory(cat)}
-                   className={`px-3 py-1 rounded-lg text-xs font-medium transition-all capitalize ${
+                   className={`px-3 py-1 rounded-lg text-base font-medium transition-all capitalize ${
                      activeCategory === cat
                        ? 'bg-customPurple text-white'
                        : 'bg-customBackground text-customPurpleText'
@@ -355,13 +355,14 @@
              </div>
 
              {/* Mood pills */}
-             <div className="flex flex-wrap gap-2">
+             <div className="grid grid-cols-3 gap-2">
                {MOODS.filter(m => m.cat === activeCategory).map(mood => (
                  <VibeTag
                    key={mood.name}
                    vibe={mood.name}
                    sub={mood.sub}
                    selected={selectedVibes.includes(mood.name)}
+                   className="w-full"
                    onClick={() => {
                      setSelectedVibes(prev =>
                        prev.includes(mood.name)
