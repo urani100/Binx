@@ -86,8 +86,8 @@
    }
  
    return (
-     <div className="min-h-screen relative bg-gray-50" style={{ textAlign: 'left' }}>
-       <div className="max-w-sm mx-auto p-4 pb-20">
+     <div className="min-h-screen relative" style={{ textAlign: 'left' }}>
+       <div className="max-w-sm mx-auto p-4 pb-20 bg-gray-50 min-h-screen">
  
          {/* Header - EXACT REPLICA */}
          <div className="flex justify-between items-center mb-6">
