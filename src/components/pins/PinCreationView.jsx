@@ -55,6 +55,7 @@
  
    // Additional state for UI management
    const [selectedMood, setSelectedMood] = useState('')
+   const [activeCategory, setActiveCategory] = useState('bright')
    const [locationName, setLocationName] = useState('')
    const [isLocationLoading, setIsLocationLoading] = useState(false)
    const [isSearchingLocation, setIsSearchingLocation] = useState(false) // Location search
