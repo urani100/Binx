@@ -54,8 +54,7 @@
    })
  
    // Additional state for UI management
-   const [selectedVibes, setSelectedVibes] = useState([])
-   const [activeCategory, setActiveCategory] = useState('bright')
+   const [selectedMood, setSelectedMood] = useState('')
    const [locationName, setLocationName] = useState('')
    const [isLocationLoading, setIsLocationLoading] = useState(false)
    const [isSearchingLocation, setIsSearchingLocation] = useState(false) // Location search
@@ -87,7 +86,7 @@
        })
  
        // Reset other form fields
-       setSelectedVibes([])
+       setSelectedMood('')
        setActiveCategory('bright')
        setMapLocation(null) // Reset map location to use current GPS
        
@@ -239,8 +238,7 @@
        // Store will handle all uploads and URL generation
        const pinData = {
          title: newPin.title,
-         mood: selectedVibes[0] || '',
-         moods: selectedVibes,
+         mood: selectedMood,
          note: newPin.note,
          photo: newPin.photo,           // Raw data URL - store will upload
          audioBlob: audioBlob,          // Raw blob - store will upload
@@ -361,15 +359,9 @@
                    key={mood.name}
                    vibe={mood.name}
                    sub={mood.sub}
-                   selected={selectedVibes.includes(mood.name)}
+                   selected={selectedMood === mood.name}
                    className="w-full"
-                   onClick={() => {
-                     setSelectedVibes(prev =>
-                       prev.includes(mood.name)
-                         ? prev.filter(v => v !== mood.name)
-                         : [...prev, mood.name]
-                     )
-                   }}
+                   onClick={() => setSelectedMood(prev => prev === mood.name ? '' : mood.name)}
                  />
                ))}
              </div>
