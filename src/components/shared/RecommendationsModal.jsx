@@ -249,17 +249,17 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Refine button */}
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-3 mb-6">
                     <button
                         onClick={() => setShowRefine(true)}
-                        className="flex-1 py-2 px-4 bg-customPurple text-white rounded-xl text-sm font-medium transition-colors hover:opacity-90"
+                        className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
                     >
                         Refine Recommendations
                     </button>
                     {activeFilters && (
                         <button
                             onClick={() => { setActiveFilters(null); clearRecommendations(); generateRecommendations() }}
-                            className="text-sm text-customPurpleText underline"
+                            className="text-customPurpleText font-medium transition-colors"
                         >
                             Clear
                         </button>
