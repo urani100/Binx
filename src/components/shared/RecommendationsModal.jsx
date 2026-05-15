@@ -9,6 +9,23 @@ import { LoadingSpinner } from '../ui'
 import { API_ENDPOINTS } from '../../utils/constants'
 import { edgeFunctionHeaders } from '../../services/supabase'
 import RecommendationCard from './RecommendationCard'
+import RefineSearchModal from './RefineSearchModal'
+
+const REC_CATEGORY_OPTIONS = [
+  'Restaurant', 'Café', 'Bar', 'Cocktail bar',
+  'Museum', 'Gallery', 'Park', 'Bookshop',
+  'Market', 'Live music', 'Rooftop', 'Bakery',
+  'Spa', 'Cinema', 'Jazz club', 'Wine bar'
+]
+const REC_PRICE_OPTIONS = [1, 2, 3, 4]
+
+const buildRefinementContext = (filters) => {
+  const parts = []
+  if (filters.types?.length) parts.push(`Venue types: ${filters.types.join(', ')}`)
+  if (filters.prices?.length) parts.push(`Price levels: ${filters.prices.map(p => '$'.repeat(p)).join(', ')}`)
+  if (filters.radius) parts.push(`Maximum distance: ${filters.radius < 1000 ? `${filters.radius}m` : `${filters.radius / 1000}km`}`)
+  return parts.join('. ')
+}
 
 const RecommendationsModal = ({ isOpen, onClose }) => {
     const { user, updateProfile } = useAuth()
@@ -33,6 +50,8 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
         weatherReady: false,
         allReady: false
     })
+    const [showRefine, setShowRefine] = useState(false)
+    const [activeFilters, setActiveFilters] = useState(null)
 
     useEffect(() => {
         const handleEscape = (e) => {
@@ -140,7 +159,8 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                     location_accuracy: validation.locationReady ? 'high' : 'low',
                     weather_accuracy: validation.weatherReady ? 'real' : 'estimated',
                     profile_completeness: user.profile.enhancedOnboardingCompleted ? 'complete' : 'basic'
-                }
+                },
+                ...(activeFilters && { refinement_context: buildRefinementContext(activeFilters) })
             }
 
             const response = await fetch(API_ENDPOINTS.RECOMMENDATIONS, {
@@ -205,7 +225,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
             <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left max-h-[90vh] overflow-y-auto">
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-4">
                     <button
                         onClick={handleRefresh}
                         className="text-customPurpleText transition-colors"
@@ -217,7 +237,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                             : <i className="fas fa-sync-alt text-base"></i>
                         }
                     </button>
-                    <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-6">Recommendations</h3>
+                    <h3 className="text-xl font-semibold text-customPurpleText pl-6">Recommendations</h3>
                     <button
                         onClick={onClose}
                         className="text-customPurpleText transition-colors"
@@ -225,6 +245,24 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                     >
                         ✕
                     </button>
+                </div>
+
+                {/* Refine button */}
+                <div className="flex items-center gap-2 mb-6">
+                    <button
+                        onClick={() => setShowRefine(true)}
+                        className="flex-1 py-2 px-4 bg-customPurple text-white rounded-xl text-sm font-medium transition-colors hover:opacity-90"
+                    >
+                        Refine Recommendations
+                    </button>
+                    {activeFilters && (
+                        <button
+                            onClick={() => { setActiveFilters(null); clearRecommendations(); generateRecommendations() }}
+                            className="text-sm text-customPurpleText underline"
+                        >
+                            Clear
+                        </button>
+                    )}
                 </div>
 
                 {/* Data readiness indicator */}
@@ -331,6 +369,21 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 )}
             </div>
         </div>
+
+        {showRefine && (
+            <RefineSearchModal
+                onClose={() => setShowRefine(false)}
+                initial={activeFilters || {}}
+                categoryOptions={REC_CATEGORY_OPTIONS}
+                priceOptions={REC_PRICE_OPTIONS}
+                onApply={(filters) => {
+                    setActiveFilters(filters)
+                    setShowRefine(false)
+                    clearRecommendations()
+                    generateRecommendations()
+                }}
+            />
+        )}
     )
 }
 

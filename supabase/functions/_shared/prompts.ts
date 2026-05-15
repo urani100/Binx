@@ -83,8 +83,9 @@ export function buildRecommendationPrompt(userContext: {
   }
   user_preferences: Record<string, unknown>
   pin_history: Array<{ location?: { name?: string }; note?: string }>
+  refinement_context?: string
 }): string {
-  const { current_context, user_preferences, pin_history } = userContext
+  const { current_context, user_preferences, pin_history, refinement_context } = userContext
 
   const recentPinsSummary = pin_history.slice(0, 2).map(pin => {
     const pinName = pin.location?.name ?? 'Unknown Location'
@@ -108,6 +109,10 @@ export function buildRecommendationPrompt(userContext: {
     .filter(Boolean)
     .join('; ')
 
+  const refinementNote = refinement_context
+    ? `\nActive Refinement (takes priority over general preferences where they conflict): ${refinement_context}`
+    : ''
+
   return `Current Context:
 Location: ${current_context.location?.address ?? 'Unknown Location'}
 Weather: ${current_context.weather?.condition ?? 'Clear'}, ${current_context.weather?.temperature ?? '20'}°C
@@ -116,6 +121,6 @@ Time: ${current_context.weather?.time_of_day ?? 'Unknown'}
 User History and Preferences:
 Recent Pins: ${recentPinsSummary || 'None'}
 Preferences: ${preferencesSummary || 'None'}
-
+${refinementNote}
 Generate a variety of recommendations based on the provided context and preferences.`
 }

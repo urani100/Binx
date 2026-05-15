@@ -14,6 +14,7 @@
  export { default as LocationsModal } from './LocationsModal'
  export { default as SavedLocationsModal } from './SavedLocationsModal'
  export { default as RecommendationCard } from './RecommendationCard'
+ export { default as RefineSearchModal } from './RefineSearchModal'
 
 
 

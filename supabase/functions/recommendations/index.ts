@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
       pin_history = [],
       data_quality = {},
       cache_key,
+      refinement_context,
     } = body
 
     if (!current_location?.lat || !current_location?.lng) {
@@ -54,7 +55,7 @@ Deno.serve(async (req) => {
     }
 
     const userContext = transformToUserContext({ current_location, weather_data, user_preferences, pin_history, data_quality })
-    const prompt = buildRecommendationPrompt(userContext)
+    const prompt = buildRecommendationPrompt({ ...userContext, refinement_context })
 
     const anthropic = new Anthropic({ apiKey })
 
