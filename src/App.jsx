@@ -129,9 +129,7 @@
     */
    const handleDeleteFromDetail = (pin) => {
      clearSelectedPin()
-     setTimeout(() => {
-       showDeleteConfirmModal(pin)
-     }, 100)
+     showDeleteConfirmModal(pin)
    }
  
    // Show auth view if not authenticated

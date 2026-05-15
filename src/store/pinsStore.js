@@ -201,7 +201,7 @@ export const usePinsStore = create((set, get) => ({
         }
       }
 
-      set({ loading: false })
+      set({ pins: get().pins.filter(p => p.id !== pinId), loading: false })
       return { success: true }
 
     } catch (error) {
