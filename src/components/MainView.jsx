@@ -182,7 +182,7 @@
                >
                  BiNx!
                </button>
-               <h3 className="font-medium text-customPurpleText mb-2">Locations . Recommendations . Vibes</h3>
+               <h3 className="font-medium text-customPurpleText mb-2">Hi {user?.name || 'there'}! Add Your First Vibe.</h3>
              </div>
            ) : (
              // Pins List - EXACT REPLICA
