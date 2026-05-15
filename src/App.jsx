@@ -38,6 +38,7 @@
    const showUserProfile = useUIStore(state => state.showUserProfile)
    const onboardingModal = useUIStore(state => state.onboardingModal)
    const recommendationsModal = useUIStore(state => state.recommendationsModal)
+   const selectedGuideName = useUIStore(state => state.selectedGuideName)
    
    // State for enhanced onboarding
    const [showEnhancedOnboarding, setShowEnhancedOnboarding] = useState(false)
@@ -66,6 +67,16 @@
        showOnboardingModal()
      }
    }, [isAuthenticated, profileLoaded, user?.profile?.onboardingCompleted])
+
+   // Set cursor to selected avatar
+   useEffect(() => {
+     if (isAuthenticated && selectedGuideName) {
+       document.body.style.cursor = `url(images/${selectedGuideName.toLowerCase()}.svg) 16 16, auto`
+     } else {
+       document.body.style.cursor = 'auto'
+     }
+     return () => { document.body.style.cursor = 'auto' }
+   }, [isAuthenticated, selectedGuideName])
 
    // Seed saved locations from profile into UI store after profile loads
    useEffect(() => {
