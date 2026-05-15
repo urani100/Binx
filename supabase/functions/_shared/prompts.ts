@@ -110,7 +110,7 @@ export function buildRecommendationPrompt(userContext: {
     .join('; ')
 
   const refinementNote = refinement_context
-    ? `\nActive Refinement (takes priority over general preferences where they conflict): ${refinement_context}`
+    ? `\nUser Refinement — RANKED FIRST, HIGH PRIORITY:\nThe user has explicitly requested: ${refinement_context}\nInstructions: (1) Place all venues matching the requested types at the TOP of the recommendations list. (2) Assign matching venues an ai_confidence of 0.85 or higher regardless of profile fit. (3) Fill remaining slots with contextually appropriate alternatives. Do not let profile preferences override this refinement.`
     : ''
 
   return `Current Context:
