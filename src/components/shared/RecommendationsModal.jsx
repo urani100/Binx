@@ -332,6 +332,23 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 {/* Current Recommendations */}
                 {currentRecommendations.length > 0 && (
                     <div className="mb-6">
+
+                        {/* No-match notice when active type filters produced no matching results */}
+                        {activeFilters?.types?.length > 0 && (() => {
+                            const selectedTypes = activeFilters.types.map(t => t.toLowerCase())
+                            const hasMatch = currentRecommendations.some(rec => {
+                                const haystack = [rec.category, ...(rec.tags || [])].join(' ').toLowerCase()
+                                return selectedTypes.some(t => haystack.includes(t))
+                            })
+                            return !hasMatch ? (
+                                <div className="mb-4 p-3 bg-customBackground rounded-xl">
+                                    <p className="text-sm text-customPurpleText">
+                                        No <span className="font-medium">{activeFilters.types.join(', ')}</span> found nearby. Showing the best alternatives in your area.
+                                    </p>
+                                </div>
+                            ) : null
+                        })()}
+
                         <div className="overflow-y-auto scroll-smooth">
                             <div className="flex flex-col gap-4" ref={currentScrollRef}>
                                 {currentRecommendations.map((rec, index) => (

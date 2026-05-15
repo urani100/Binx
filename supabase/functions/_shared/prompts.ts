@@ -60,7 +60,7 @@ export const RECOMMENDATIONS_TOOL = {
           properties: {
             name:              { type: 'string' },
             address:           { type: 'string' },
-            category:          { type: 'string', enum: ['cafe', 'restaurant', 'park', 'gallery', 'bar'] },
+            category:          { type: 'string', enum: ['cafe', 'restaurant', 'park', 'gallery', 'bar', 'cocktail bar', 'museum', 'bookshop', 'market', 'live music', 'rooftop', 'bakery', 'spa', 'cinema', 'jazz club', 'wine bar'] },
             vibe_match_reason: { type: 'string', description: 'Why this place matches the user (max 20 words)' },
             distance_km:       { type: 'number' },
             estimated_minutes: { type: 'integer' },
