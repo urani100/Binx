@@ -342,7 +342,7 @@
                    key={cat}
                    type="button"
                    onClick={() => setActiveCategory(cat)}
-                   className={`px-3 py-1 rounded-lg text-base font-medium transition-all capitalize ${
+                   className={`px-3 py-1 rounded-lg text-sm font-medium transition-all capitalize ${
                      activeCategory === cat
                        ? 'bg-customPurple text-white'
                        : 'bg-customBackground text-customPurpleText'
