@@ -249,7 +249,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Refine button */}
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center justify-center gap-3 mb-6">
                     <button
                         onClick={() => setShowRefine(true)}
                         className="py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
