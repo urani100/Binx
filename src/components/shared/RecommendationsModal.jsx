@@ -221,6 +221,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
     const { currentRecommendations, savedRecommendations, loading, error } = recommendationsModal
 
     return (
+        <>
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left max-h-[90vh] overflow-y-auto">
 
@@ -384,6 +385,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 }}
             />
         )}
+        </>
     )
 }
 
