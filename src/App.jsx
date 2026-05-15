@@ -167,7 +167,7 @@
              width: '60px',
              pointerEvents: 'none',
              zIndex: 99999,
-             transform: 'translate(-50%, -100%)',
+             transform: 'translate(-15%, 0)',
            }}
          />
        )}
