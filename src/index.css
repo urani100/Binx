@@ -18,6 +18,12 @@ body {
   cursor: pointer;
 }
 
+/* Floating avatar cursor — suppress all native cursors */
+body.hide-cursor,
+body.hide-cursor * {
+  cursor: none !important;
+}
+
 /* Hide scrollbars for carousel */
 .overflow-x-auto {
   scrollbar-width: none;

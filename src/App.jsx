@@ -72,15 +72,15 @@
    // Floating avatar cursor
    useEffect(() => {
      if (!isAuthenticated || !selectedGuideName) {
-       document.body.style.cursor = 'auto'
+       document.body.classList.remove('hide-cursor')
        return
      }
-     document.body.style.cursor = 'none'
+     document.body.classList.add('hide-cursor')
      const move = (e) => setCursorPos({ x: e.clientX, y: e.clientY })
      window.addEventListener('mousemove', move)
      return () => {
        window.removeEventListener('mousemove', move)
-       document.body.style.cursor = 'auto'
+       document.body.classList.remove('hide-cursor')
      }
    }, [isAuthenticated, selectedGuideName])
 
