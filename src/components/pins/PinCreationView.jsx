@@ -283,7 +283,7 @@
     * Check if save button should be disabled
     * Updated: August 9, 2025 - Maintained original logic
     */
-   const isSaveDisabled = !newPin.title.trim()
+   const isSaveDisabled = !newPin.title.trim() || !selectedMood
  
    // Don't render if modal is not open
    if (!isOpen) return null
