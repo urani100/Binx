@@ -93,7 +93,8 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
         return { userReady, locationReady, weatherReady, allReady: userReady && locationReady }
     }
 
-    const generateRecommendations = async () => {
+    const generateRecommendations = async (filtersOverride = undefined) => {
+        const filtersToUse = filtersOverride !== undefined ? filtersOverride : activeFilters
         const validation = validateDataReadiness()
 
         if (!validation.allReady) {
@@ -160,7 +161,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                     weather_accuracy: validation.weatherReady ? 'real' : 'estimated',
                     profile_completeness: user.profile.enhancedOnboardingCompleted ? 'complete' : 'basic'
                 },
-                ...(activeFilters && { refinement_context: buildRefinementContext(activeFilters) })
+                ...(filtersToUse && { refinement_context: buildRefinementContext(filtersToUse) })
             }
 
             const response = await fetch(API_ENDPOINTS.RECOMMENDATIONS, {
@@ -398,7 +399,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                     setActiveFilters(filters)
                     setShowRefine(false)
                     clearRecommendations()
-                    generateRecommendations()
+                    generateRecommendations(filters)
                 }}
             />
         )}
