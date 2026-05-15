@@ -80,7 +80,12 @@
          
          <div className="flex flex-col items-end space-y-2">
            <div className="flex items-center space-x-2">
-             <VibeTag vibe={pin.mood} />
+             {Array.isArray(pin.moods) && pin.moods.length > 0
+             ? pin.moods.map(m => <VibeTag key={m} vibe={m} size="sm" />)
+             : pin.mood
+               ? <VibeTag vibe={pin.mood} size="sm" />
+               : null
+           }
              {/* Delete Button - EXACT ORIGINAL STYLING (NO PINK HOVER) */}
              <button
                onClick={handleDeleteClick}

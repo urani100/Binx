@@ -21,27 +21,52 @@ export const API_ENDPOINTS = {
   }
   
   // Vibe Tags for Pin Creation
-  export const VIBES = [
-    'blissful',
-    'contemplative',
-    'curious', 
-    'electric',
-    'Ecstatic',
-    'grateful',
-    'intimate',
-    'jovial',
-    'luminous',
-    'moody',
-    'Pensive',
-    'playful',
-    'radiant',
-    'rhapsodic',
-    'serene',
-    'soft',
-    'vibrant',
-    'whimsical'
+  export const MOOD_CATEGORIES = ['bright', 'calm', 'intense', 'dark', 'warm']
+
+  export const MOODS = [
+    { name: 'Blissful',      sub: 'peak happiness',      cat: 'bright',  tags: ['joy','peace','euphoria'],              desc: 'A state of profound happiness where everything feels perfectly right — weightless, warm, and wonderfully complete.' },
+    { name: 'Contemplative', sub: 'deep in thought',     cat: 'calm',    tags: ['reflective','pensive','wondering'],    desc: 'Quiet, inward focus — the mind turns over ideas slowly, like stones in a clear stream, unhurried and curious.' },
+    { name: 'Curious',       sub: 'lit with wonder',     cat: 'bright',  tags: ['wondering','eager','open'],            desc: 'An alert, leaning-forward feeling. Every new detail opens another door. The world is a puzzle worth solving.' },
+    { name: 'Electric',      sub: 'charged up',          cat: 'intense', tags: ['energy','buzzing','alive'],            desc: 'The nervous system crackles. Thoughts arrive faster than words. Something big is about to happen.' },
+    { name: 'Ecstatic',      sub: 'beyond joy',          cat: 'intense', tags: ['euphoric','wild','exhilarated'],      desc: 'Joy that exceeds its container — laughter spilling out, arms wide open, a fullness that almost hurts.' },
+    { name: 'Grateful',      sub: 'heart full',          cat: 'warm',    tags: ['thankful','appreciative','moved'],     desc: 'A soft warmth for what has been given — people, moments, luck. The feeling of not taking things for granted.' },
+    { name: 'Intimate',      sub: 'close and safe',      cat: 'warm',    tags: ['tender','vulnerable','close'],         desc: 'A quiet sharing of unguarded selves. Words come gently. Time slows. The other person is truly seen.' },
+    { name: 'Jovial',        sub: 'infectious cheer',    cat: 'bright',  tags: ['merry','buoyant','warm'],              desc: 'Cheerfulness that radiates outward — laughter comes easily, generosity flows, and the room gets lighter.' },
+    { name: 'Luminous',      sub: 'glowing, radiant',    cat: 'bright',  tags: ['shining','clear','vivid'],             desc: 'A quality of inner brightness — clarity, presence, and a glow that softens everything around it.' },
+    { name: 'Moody',         sub: 'shifting inward',     cat: 'dark',    tags: ['brooding','complex','fluctuating'],   desc: 'An emotional climate with its own weather — sudden cloud cover, pockets of strange beauty, hard to explain.' },
+    { name: 'Pensive',       sub: 'quietly weighed',     cat: 'calm',    tags: ['thoughtful','wistful','reflective'],  desc: 'Gentle sadness mingled with thinking. A pause at the window. The kind of quiet that asks real questions.' },
+    { name: 'Playful',       sub: 'light and free',      cat: 'bright',  tags: ['fun','light','spontaneous'],           desc: 'Gravity loosens its grip. Rules become suggestions. Everything is a prop in an improvised game.' },
+    { name: 'Radiant',       sub: 'warmth outward',      cat: 'bright',  tags: ['warm','beaming','luminous'],           desc: 'Light from the inside out — presence that others can feel, warmth that doesn\'t demand anything back.' },
+    { name: 'Rhapsodic',     sub: 'swept away',          cat: 'intense', tags: ['transported','rapturous','effusive'], desc: 'Lost in something beautiful — music, a view, a sentence. The self dissolves briefly into pure experience.' },
+    { name: 'Serene',        sub: 'still waters',        cat: 'calm',    tags: ['peaceful','untroubled','clear'],      desc: 'Stillness without emptiness. A calm that has been earned — deep, settled, like an unruffled lake at dawn.' },
+    { name: 'Soft',          sub: 'open and gentle',     cat: 'calm',    tags: ['tender','yielding','gentle'],          desc: 'Edges blurred, voice lowered, nothing urgent. A feeling that leaves room for others to be imperfect.' },
+    { name: 'Vibrant',       sub: 'fully alive',         cat: 'intense', tags: ['vivid','alive','energetic'],           desc: 'Maximum saturation — colors brighter, sounds sharper, presence complete. Everything feels worth noticing.' },
+    { name: 'Whimsical',     sub: 'delightfully odd',    cat: 'bright',  tags: ['fanciful','quirky','light'],           desc: 'A sideways glance at ordinary things. Delight in the unexpected. Possibility hiding in plain sight.' },
+    { name: 'Wistful',       sub: 'sweet longing',       cat: 'dark',    tags: ['nostalgic','yearning','tender'],       desc: 'Memory touched with longing — love for something that can\'t be retrieved, but wouldn\'t be erased.' },
+    { name: 'Fierce',        sub: 'burning intent',      cat: 'intense', tags: ['powerful','determined','blazing'],    desc: 'A focused, unsentimental energy. Obstacles become fuel. No apologies, no detours, pure forward motion.' },
+    { name: 'Tender',        sub: 'open-hearted',        cat: 'warm',    tags: ['gentle','loving','vulnerable'],        desc: 'Caring without armor — the particular softness that comes when something or someone is precious.' },
+    { name: 'Melancholic',   sub: 'beautifully sad',     cat: 'dark',    tags: ['sad','wistful','bittersweet'],        desc: 'Sadness that has found its shape — no longer just pain, but something you could hold and turn over.' },
+    { name: 'Eager',         sub: 'forward-leaning',     cat: 'bright',  tags: ['ready','enthusiastic','anticipating'],desc: 'The feeling just before the starting gun. Everything aimed forward, nothing held in reserve.' },
+    { name: 'Reverent',      sub: 'awed and humbled',    cat: 'calm',    tags: ['awed','sacred','humble'],              desc: 'Standing before something vast — nature, genius, love — and feeling small in the very best way.' },
+    { name: 'Giddy',         sub: 'dizzy with delight',  cat: 'bright',  tags: ['silly','elated','bubbling'],           desc: 'Delight with a wobble in it — laughter without a clear cause, lightness that tips toward dizzy.' },
+    { name: 'Brooding',      sub: 'heavy and slow',      cat: 'dark',    tags: ['dark','introspective','weighty'],     desc: 'Thoughts that circle back and go deeper. A gathering of emotional pressure, looking for its release.' },
+    { name: 'Nostalgic',     sub: 'past made present',   cat: 'warm',    tags: ['longing','remembering','bittersweet'],desc: 'The past arriving uninvited — a song, a smell, a color — and suddenly you\'re somewhere you can\'t go back to.' },
+    { name: 'Euphoric',      sub: 'pure overflow',       cat: 'intense', tags: ['peak','elated','boundless'],           desc: 'Joy without friction — the kind that makes you want to tell a stranger. Briefly, everything is permitted.' },
+    { name: 'Languid',       sub: 'slow and warm',       cat: 'calm',    tags: ['unhurried','dreamy','relaxed'],        desc: 'Time stretched like taffy on a summer afternoon. No urgency, no resistance — just warmth and ease.' },
+    { name: 'Resolute',      sub: 'firmly decided',      cat: 'intense', tags: ['determined','committed','unshakable'],desc: 'The quiet after a hard decision — clarity replacing doubt, direction chosen, no looking back.' },
+    { name: 'Awestruck',     sub: 'stopped in place',    cat: 'calm',    tags: ['wonder','reverence','stunned'],        desc: 'The moment a view, a performance, or a realization simply stops you — mind blank, breath held, time paused.' },
+    { name: 'Anxious',       sub: 'a restless hum',      cat: 'dark',    tags: ['nervous','worried','anticipating'],   desc: 'Thoughts racing ahead of facts. The future arriving in fragments, none of them quite right yet.' },
+    { name: 'Effervescent',  sub: 'sparkling over',      cat: 'bright',  tags: ['bubbly','lively','sparkling'],         desc: 'Energy that can\'t sit still — thoughts and words fizzing upward like carbonation looking for the surface.' },
+    { name: 'Devoted',       sub: 'wholly committed',    cat: 'warm',    tags: ['loyal','loving','steadfast'],          desc: 'Love that doesn\'t ask what it gets back. Presence that shows up regardless.' },
+    { name: 'Dreamy',        sub: 'half somewhere else', cat: 'calm',    tags: ['drifting','hazy','imaginative'],       desc: 'Attention pooling in the middle distance. Boundaries softened. The real and imagined briefly roommates.' },
+    { name: 'Defiant',       sub: 'refusing to yield',   cat: 'intense', tags: ['resistant','bold','unyielding'],      desc: 'Standing opposite the current. The \'no\' that costs something but means something.' },
+    { name: 'Magnetic',      sub: 'drawing others in',   cat: 'intense', tags: ['compelling','charismatic','powerful'],desc: 'An energy that bends the room. People lean in. Whatever you\'re doing, they want to be near it.' },
+    { name: 'Tranquil',      sub: 'deeply at rest',      cat: 'calm',    tags: ['peaceful','still','settled'],          desc: 'Rest that reaches all the way down — no background noise, no pending things, just presence without agenda.' },
+    { name: 'Sentimental',   sub: 'moved by the past',   cat: 'warm',    tags: ['nostalgic','touched','warm'],          desc: 'Emotions rising to the surface at the sight of something ordinary — a photo, a song, a particular smell.' },
+    { name: 'Galvanized',    sub: 'moved to action',     cat: 'intense', tags: ['motivated','activated','energized'],  desc: 'Something clicked. Hesitation dissolved. The body has already decided and the mind is just catching up.' },
   ]
-  
+
+
   // Color Palettes for Theme Customization
   export const PALETTES = [
     {

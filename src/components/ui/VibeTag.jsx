@@ -12,10 +12,11 @@
   * VibeTag Component
   * Displays a vibe as a clickable tag with selection state
   */
- const VibeTag = ({ 
-   vibe, 
-   selected = false, 
-   onClick, 
+ const VibeTag = ({
+   vibe,
+   sub,
+   selected = false,
+   onClick,
    size = 'md',
    disabled = false,
    className = ''
@@ -59,18 +60,20 @@
        onClick={handleClick}
        onKeyDown={handleKeyDown}
        disabled={disabled}
-       className={`${baseClasses} ${stateClasses}`}
+       className={`${baseClasses} ${stateClasses} flex flex-col items-center leading-tight`}
        aria-pressed={selected}
        aria-label={`Select ${vibe} vibe`}
        title={`${vibe} vibe`}
      >
-       {vibe}
+       <span>{vibe}</span>
+       {sub && <span className="text-[10px] font-normal opacity-60 mt-0.5">{sub}</span>}
      </button>
    )
  }
  
  VibeTag.propTypes = {
    vibe: PropTypes.string.isRequired,
+   sub: PropTypes.string,
    selected: PropTypes.bool,
    onClick: PropTypes.func,
    size: PropTypes.oneOf(['sm', 'md', 'lg']),

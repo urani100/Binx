@@ -16,7 +16,7 @@
  import { usePinsStore } from '../../store/pinsStore'
  import { VibeTag } from '../ui'
  import { CustomAudioPlayer } from '../shared'
- import { VIBES, API_ENDPOINTS } from '../../utils/constants'
+ import { MOODS, MOOD_CATEGORIES, API_ENDPOINTS } from '../../utils/constants'
  import { edgeFunctionHeaders } from '../../services/supabase'
  import { InteractiveLocationPicker } from '../shared'
  
@@ -54,7 +54,8 @@
    })
  
    // Additional state for UI management
-   const [selectedVibe, setSelectedVibe] = useState(VIBES[0])
+   const [selectedVibes, setSelectedVibes] = useState([])
+   const [activeCategory, setActiveCategory] = useState('all')
    const [locationName, setLocationName] = useState('')
    const [isLocationLoading, setIsLocationLoading] = useState(false)
    const [isSearchingLocation, setIsSearchingLocation] = useState(false) // Location search
@@ -86,7 +87,8 @@
        })
  
        // Reset other form fields
-       setSelectedVibe(VIBES[0])
+       setSelectedVibes([])
+       setActiveCategory('all')
        setMapLocation(null) // Reset map location to use current GPS
        
        // Use already-geocoded address from locationStore — no API call needed
@@ -237,7 +239,8 @@
        // Store will handle all uploads and URL generation
        const pinData = {
          title: newPin.title,
-         mood: selectedVibe,
+         mood: selectedVibes[0] || '',
+         moods: selectedVibes,
          note: newPin.note,
          photo: newPin.photo,           // Raw data URL - store will upload
          audioBlob: audioBlob,          // Raw blob - store will upload
@@ -327,18 +330,56 @@
              />
            </div>
  
-           {/* Vibe Selection Section */}
+           {/* Mood Selection Section */}
            <div>
-             <label className="block text-l ont-medium  text-customPurpleText mb-2">
+             <label className="block text-l ont-medium text-customPurpleText mb-2">
                Capture the mood!
              </label>
-             <div className="flex flex-wrap gap-2" role="group" aria-label="Select vibe">
-               {VIBES.map(vibe => (
+
+             {/* Category filter pills */}
+             <div className="flex flex-wrap gap-2 mb-3" role="group" aria-label="Filter by category">
+               <button
+                 type="button"
+                 onClick={() => setActiveCategory('all')}
+                 className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide transition-all ${
+                   activeCategory === 'all'
+                     ? 'bg-customPurple text-white shadow-md'
+                     : 'bg-gray-100 text-gray-500'
+                 }`}
+               >
+                 All
+               </button>
+               {MOOD_CATEGORIES.map(cat => (
+                 <button
+                   key={cat}
+                   type="button"
+                   onClick={() => setActiveCategory(cat)}
+                   className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide transition-all ${
+                     activeCategory === cat
+                       ? 'bg-customPurple text-white shadow-md'
+                       : 'bg-gray-100 text-gray-500'
+                   }`}
+                 >
+                   {cat}
+                 </button>
+               ))}
+             </div>
+
+             {/* Mood pills */}
+             <div className="flex flex-wrap gap-2" role="group" aria-label="Select moods">
+               {MOODS.filter(m => activeCategory === 'all' || m.cat === activeCategory).map(mood => (
                  <VibeTag
-                   key={vibe}
-                   vibe={vibe}
-                   selected={selectedVibe === vibe}
-                   onClick={() => setSelectedVibe(vibe)}
+                   key={mood.name}
+                   vibe={mood.name}
+                   sub={mood.sub}
+                   selected={selectedVibes.includes(mood.name)}
+                   onClick={() => {
+                     setSelectedVibes(prev =>
+                       prev.includes(mood.name)
+                         ? prev.filter(v => v !== mood.name)
+                         : [...prev, mood.name]
+                     )
+                   }}
                  />
                ))}
              </div>
