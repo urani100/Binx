@@ -29,7 +29,7 @@
  
    const baseClasses = `
      ${sizeClasses[size]} 
-     rounded-full 
+     rounded-lg
      font-medium 
      transition-all 
      duration-200

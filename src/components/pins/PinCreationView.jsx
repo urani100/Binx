@@ -55,7 +55,7 @@
  
    // Additional state for UI management
    const [selectedVibes, setSelectedVibes] = useState([])
-   const [activeCategory, setActiveCategory] = useState('all')
+   const [activeCategory, setActiveCategory] = useState('bright')
    const [locationName, setLocationName] = useState('')
    const [isLocationLoading, setIsLocationLoading] = useState(false)
    const [isSearchingLocation, setIsSearchingLocation] = useState(false) // Location search
@@ -88,7 +88,7 @@
  
        // Reset other form fields
        setSelectedVibes([])
-       setActiveCategory('all')
+       setActiveCategory('bright')
        setMapLocation(null) // Reset map location to use current GPS
        
        // Use already-geocoded address from locationStore — no API call needed
@@ -337,27 +337,16 @@
              </label>
 
              {/* Category filter pills */}
-             <div className="flex flex-wrap gap-2 mb-3" role="group" aria-label="Filter by category">
-               <button
-                 type="button"
-                 onClick={() => setActiveCategory('all')}
-                 className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide transition-all ${
-                   activeCategory === 'all'
-                     ? 'bg-customPurple text-white shadow-md'
-                     : 'bg-gray-100 text-gray-500'
-                 }`}
-               >
-                 All
-               </button>
+             <div className="flex flex-wrap gap-2 mb-3">
                {MOOD_CATEGORIES.map(cat => (
                  <button
                    key={cat}
                    type="button"
                    onClick={() => setActiveCategory(cat)}
-                   className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide transition-all ${
+                   className={`px-3 py-1 rounded-lg text-xs font-medium transition-all capitalize ${
                      activeCategory === cat
-                       ? 'bg-customPurple text-white shadow-md'
-                       : 'bg-gray-100 text-gray-500'
+                       ? 'bg-customPurple text-white'
+                       : 'bg-customBackground text-customPurpleText'
                    }`}
                  >
                    {cat}
@@ -366,8 +355,8 @@
              </div>
 
              {/* Mood pills */}
-             <div className="flex flex-wrap gap-2" role="group" aria-label="Select moods">
-               {MOODS.filter(m => activeCategory === 'all' || m.cat === activeCategory).map(mood => (
+             <div className="flex flex-wrap gap-2">
+               {MOODS.filter(m => m.cat === activeCategory).map(mood => (
                  <VibeTag
                    key={mood.name}
                    vibe={mood.name}
