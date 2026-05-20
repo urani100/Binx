@@ -11,6 +11,7 @@ import { edgeFunctionHeaders } from '../../services/supabase'
 import { getCurrentTimeOfDay } from '../../utils/helpers'
 import RecommendationCard from './RecommendationCard'
 import RefineSearchModal from './RefineSearchModal'
+import SavedLocationsModal from './SavedLocationsModal'
 
 const REC_CATEGORY_OPTIONS = [
   'restaurant', 'café', 'bar', 'cocktail-bar',
@@ -35,7 +36,6 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
   const { pins } = usePins()
 
   const currentScrollRef = useRef(null)
-  const savedScrollRef = useRef(null)
 
   const recommendationsModal = useUIStore(state => state.recommendationsModal)
   const showMessage = useUIStore(state => state.showMessageModal)
@@ -57,6 +57,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
     allReady: false
   })
   const [showRefine, setShowRefine] = useState(false)
+  const [showSaved, setShowSaved] = useState(false)
   const [activeFilters, setActiveFilters] = useState(null)
 
   useEffect(() => {
@@ -441,28 +442,26 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Saved Recommendations */}
+          {/* Saved Locations button */}
           {savedRecommendations.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-6">Saved</h3>
-              <div className="overflow-y-auto scroll-smooth">
-                <div className="flex flex-col gap-4" ref={savedScrollRef}>
-                  {savedRecommendations.map((rec, index) => (
-                    <RecommendationCard
-                      key={`saved-${index}`}
-                      recommendation={rec}
-                      onRemove={() => handleRemoveSaved(rec.name)}
-                      onDirections={() => handleGetDirections(rec)}
-                      isSaved={true}
-                      showSavedDate={true}
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="px-6 mb-6">
+              <button
+                onClick={() => setShowSaved(true)}
+                className="w-full py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
+              >
+                Saved Locations
+              </button>
             </div>
           )}
         </div>
       </div>
+
+      {showSaved && (
+        <SavedLocationsModal
+          isOpen={showSaved}
+          onClose={() => setShowSaved(false)}
+        />
+      )}
 
       {showRefine && (
         <RefineSearchModal
