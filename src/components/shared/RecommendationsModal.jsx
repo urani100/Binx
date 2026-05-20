@@ -321,10 +321,10 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Refine button */}
-          <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex items-center gap-3 px-6 mb-6">
             <button
               onClick={() => setShowRefine(true)}
-              className="py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
+              className="flex-1 py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
             >
               Refine Recommendations
             </button>
@@ -444,10 +444,10 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
 
           {/* Saved Locations button */}
           {savedRecommendations.length > 0 && (
-            <div className="flex items-center justify-center mb-6">
+            <div className="flex items-center px-6 mb-6">
               <button
                 onClick={() => setShowSaved(true)}
-                className="py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
+                className="flex-1 py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
               >
                 Saved Locations
               </button>
