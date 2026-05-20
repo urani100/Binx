@@ -590,6 +590,8 @@ const SIGNAL_WEIGHTS: Record<string, number> = {
   batch_dismissed: -0.1,
 }
 
+const LEARNING_RATE = 0.15  // used by updateAtmosphereSignal below
+
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -2222,3 +2224,4 @@ Every issue identified during review is resolved inline in the section above. Re
 | R3 | `lat`/`lng` absent from tool schema; proximity always null | §4.2 tool schema — fields added; system prompt instructs Claude to provide them |
 | R4 | `updateWeight` duplicated across two edge functions | §4.1b — extracted to `_shared/weights.ts`; both functions import from it |
 | R5 | `batch_dismissed` increments `signal_count` (should not) | §4.1b `countSignal` parameter; §4.5 `handleBatchDismiss` passes `false` |
+| R6 | `LEARNING_RATE` missing from §4.5 after extraction to `_shared/weights.ts` | §4.5 — `const LEARNING_RATE = 0.15` declared locally for `updateAtmosphereSignal` |
