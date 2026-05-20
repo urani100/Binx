@@ -372,7 +372,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  Deno.env.get('SERVICE_ROLE_KEY')!
 )
 
 Deno.serve(async (req) => {
@@ -498,7 +498,7 @@ const VENUE_CATEGORIES = [
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  Deno.env.get('SERVICE_ROLE_KEY')!
 )
 
 Deno.serve(async (req) => {
@@ -594,7 +594,7 @@ const LEARNING_RATE = 0.15  // used by updateAtmosphereSignal below
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  Deno.env.get('SERVICE_ROLE_KEY')!
 )
 
 Deno.serve(async (req) => {
@@ -793,7 +793,7 @@ import { updateWeight } from '../_shared/weights.ts'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  Deno.env.get('SERVICE_ROLE_KEY')!
 )
 
 const PROXIMITY_THRESHOLD_M = 150
@@ -924,7 +924,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  Deno.env.get('SERVICE_ROLE_KEY')!
 )
 
 Deno.serve(async (req) => {
