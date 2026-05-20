@@ -43,7 +43,8 @@ QUALITY BAR
 - If uncertain about a specific detail, omit it rather than guess
 - Prioritize recency — avoid recommending places that may have closed`
 
-export const RECOMMENDATIONS_TOOL = {
+export function buildRecommendationsTool(hasRefinement = false) {
+  return {
   name: 'generate_recommendations',
   description: 'Generate location recommendations for the user based on their current context and learned taste profile.',
   input_schema: {
@@ -51,7 +52,7 @@ export const RECOMMENDATIONS_TOOL = {
     properties: {
       recommendations: {
         type: 'array',
-        minItems: 7,
+        minItems: hasRefinement ? 1 : 7,
         maxItems: 10,
         items: {
           type: 'object',
@@ -83,7 +84,8 @@ export const RECOMMENDATIONS_TOOL = {
     },
     required: ['recommendations', 'reasoning']
   }
-} as const
+  }
+}
 
 export function buildRecommendationPrompt(params: {
   current_location: { lat: number; lng: number; address: string; neighborhood: string }
@@ -112,7 +114,7 @@ export function buildRecommendationPrompt(params: {
     : ''
 
   const refinementBlock = refinement_context
-    ? `\nUser refinement — RANKED FIRST, HIGH PRIORITY:\nThe user has explicitly requested: ${refinement_context}\nPlace all matching venues at the TOP of the list. Fill remaining slots with contextually appropriate alternatives.`
+    ? `\nUser refinement — STRICT FILTER, HIGH PRIORITY:\nThe user has explicitly requested: ${refinement_context}\nReturn ONLY venues that strictly match ALL of the requested criteria. Do not include any venues outside these constraints.`
     : ''
 
   return `Current Context:

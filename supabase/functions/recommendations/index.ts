@@ -1,6 +1,6 @@
 import Anthropic from 'npm:@anthropic-ai/sdk'
 import { corsHeaders } from '../_shared/cors.ts'
-import { BINX_SYSTEM_PROMPT, RECOMMENDATIONS_TOOL, buildRecommendationPrompt } from '../_shared/prompts.ts'
+import { BINX_SYSTEM_PROMPT, buildRecommendationsTool, buildRecommendationPrompt } from '../_shared/prompts.ts'
 
 // Module scope — instantiated once per cold start, reused across requests
 const anthropic = new Anthropic({ apiKey: Deno.env.get('CLAUDE_API_KEY')! })
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
         model: 'claude-sonnet-4-6',
         max_tokens: 1500,
         system: [{ type: 'text', text: BINX_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-        tools: [{ ...RECOMMENDATIONS_TOOL, cache_control: { type: 'ephemeral' } }],
+        tools: [{ ...buildRecommendationsTool(!!refinement_context), cache_control: { type: 'ephemeral' } }],
         tool_choice: { type: 'tool', name: 'generate_recommendations' },
         messages: [{ role: 'user', content: prompt }],
       }),
