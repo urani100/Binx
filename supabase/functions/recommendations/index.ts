@@ -2,10 +2,20 @@ import Anthropic from 'npm:@anthropic-ai/sdk'
 import { corsHeaders } from '../_shared/cors.ts'
 import { BINX_SYSTEM_PROMPT, RECOMMENDATIONS_TOOL, buildRecommendationPrompt } from '../_shared/prompts.ts'
 
+// Module scope — instantiated once per cold start, reused across requests
+const anthropic = new Anthropic({ apiKey: Deno.env.get('CLAUDE_API_KEY')! })
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+
+  // Computed per request — must not be at module scope or it freezes at cold-start time
+  const hour = new Date().getHours()
+  const time_of_day =
+    hour >= 5  && hour < 12 ? 'morning' :
+    hour >= 12 && hour < 17 ? 'afternoon' :
+    hour >= 17 && hour < 21 ? 'evening' : 'night'
 
   const startTime = Date.now()
 
@@ -15,49 +25,50 @@ Deno.serve(async (req) => {
       current_location,
       user_id,
       weather_data = {},
-      user_preferences = {},
-      pin_history = [],
-      data_quality = {},
-      cache_key,
+      taste_summary = '',
+      identity_narrative = '',
+      vibe_narrative = '',
+      is_cold_start = true,
+      excluded_places = [],
       refinement_context,
     } = body
 
     if (!current_location?.lat || !current_location?.lng) {
-      return new Response(JSON.stringify({ error: 'Missing required field: current_location with lat/lng' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return errorResponse('Missing required field: current_location with lat/lng', 400)
     }
-
     if (!user_id) {
-      return new Response(JSON.stringify({ error: 'Missing required field: user_id' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return errorResponse('Missing required field: user_id', 400)
     }
 
     const lat = parseFloat(current_location.lat)
     const lng = parseFloat(current_location.lng)
 
     if (isNaN(lat) || lat < -90 || lat > 90 || isNaN(lng) || lng < -180 || lng > 180) {
-      return new Response(JSON.stringify({ error: `Invalid coordinates: lat=${lat}, lng=${lng}` }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return errorResponse(`Invalid coordinates: lat=${lat}, lng=${lng}`, 400)
     }
 
-    const apiKey = Deno.env.get('CLAUDE_API_KEY')
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Claude API key not configured' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    const prompt = buildRecommendationPrompt({
+      current_location: {
+        lat,
+        lng,
+        address: current_location.address ?? `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        neighborhood: current_location.neighborhood ?? 'Unknown area'
+      },
+      weather_data: {
+        condition: weather_data.condition ?? 'Clear',
+        temperature: weather_data.temperature ?? 20,
+        is_real: weather_data.is_real ?? false
+      },
+      time_of_day,
+      taste_summary,
+      identity_narrative,
+      vibe_narrative,
+      is_cold_start,
+      excluded_places: Array.isArray(excluded_places) ? excluded_places : [],
+      refinement_context
+    })
 
-    const userContext = transformToUserContext({ current_location, weather_data, user_preferences, pin_history, data_quality })
-    const prompt = buildRecommendationPrompt({ ...userContext, refinement_context })
-
-    const anthropic = new Anthropic({ apiKey })
+    const session_id = crypto.randomUUID()
 
     const response = await Promise.race([
       anthropic.messages.create({
@@ -69,7 +80,7 @@ Deno.serve(async (req) => {
         messages: [{ role: 'user', content: prompt }],
       }),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Claude API timeout')), 100000)
+        setTimeout(() => reject(new Error('Claude API timeout')), 28000)
       ),
     ])
 
@@ -86,8 +97,8 @@ Deno.serve(async (req) => {
 
     const enriched = result.recommendations.map((r: Record<string, unknown>) => ({
       ...r,
-      placeId: null,
-      aiScore: (r.ai_confidence as number) || 0.8,
+      lat: (r.lat as number) ?? null,
+      lng: (r.lng as number) ?? null,
     }))
 
     const processingTime = Date.now() - startTime
@@ -97,82 +108,33 @@ Deno.serve(async (req) => {
       data: {
         recommendations: enriched,
         reasoning: result.reasoning,
-        cache_key: cache_key || generateCacheKey(userContext),
+        session_id,
+        is_cold_start,
         processing_time: processingTime,
-        data_quality,
       },
-      timestamp: new Date().toISOString(),
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
   } catch (error) {
-    const message = error.message ?? 'Unknown error'
-
-    if (message.includes('timeout')) {
-      return new Response(JSON.stringify({
-        error: 'Claude API request timeout',
-        message: 'The recommendation service is taking longer than expected. Please try again.',
-      }), { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    if (error instanceof Anthropic.APIError) {
+      if (error.status === 429) {
+        return errorResponse('Monthly usage limit exceeded — please try again later.', 429)
+      }
+      return errorResponse(`Claude API error: ${error.message}`, 502)
     }
 
-    if (message.includes('usage limit')) {
-      return new Response(JSON.stringify({
-        error: 'Monthly usage limit exceeded',
-        message: 'The recommendation service has reached its usage limit. Please try again later.',
-      }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    if (error.message?.includes('timeout')) {
+      return errorResponse('The recommendation service is taking longer than expected. Please try again.', 504)
     }
 
-    return new Response(JSON.stringify({
-      error: 'Failed to generate recommendations: ' + message,
-      message: 'An unexpected error occurred while generating recommendations.',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return errorResponse(`Failed to generate recommendations: ${error.message}`, 500)
   }
 })
 
-function transformToUserContext({ current_location, weather_data, user_preferences, pin_history, data_quality }: {
-  current_location: { lat: number; lng: number; address?: string; neighborhood?: string }
-  weather_data: { condition?: string; temperature?: number }
-  user_preferences: Record<string, unknown>
-  pin_history: unknown[]
-  data_quality: { weather_accuracy?: string }
-}) {
-  const hour = new Date().getHours()
-  const time_of_day =
-    hour >= 5 && hour < 12 ? 'morning' :
-    hour >= 12 && hour < 17 ? 'afternoon' :
-    hour >= 17 && hour < 21 ? 'evening' : 'night'
-
-  return {
-    current_context: {
-      location: {
-        lat: current_location.lat,
-        lng: current_location.lng,
-        address: current_location.address ?? `${current_location.lat}, ${current_location.lng}`,
-        neighborhood: current_location.neighborhood ?? 'Unknown area',
-      },
-      weather: {
-        condition: weather_data.condition ?? 'Clear',
-        temperature: weather_data.temperature ?? 20,
-        time_of_day,
-        hasRealWeather: data_quality.weather_accuracy === 'real',
-      },
-      timestamp: new Date().toISOString(),
-    },
-    user_preferences: {
-      ...user_preferences,
-      favorite_places: [
-        ...((user_preferences.cuisinePreferences as string[]) || []),
-        ...((user_preferences.activityTypes as string[]) || []),
-      ].slice(0, 5),
-    },
-    pin_history: pin_history as Array<{ location?: { name?: string }; note?: string }>,
-  }
-}
-
-
-function generateCacheKey(userContext: ReturnType<typeof transformToUserContext>) {
-  const { current_context } = userContext
-  const locationKey = `${current_context.location.lat.toFixed(3)},${current_context.location.lng.toFixed(3)}`
-  return `${locationKey}-${current_context.weather.time_of_day}-${current_context.weather.condition}`
+function errorResponse(message: string, status: number) {
+  return new Response(
+    JSON.stringify({ success: false, error: message, message }),
+    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
 }

@@ -8,9 +8,14 @@
 // API Endpoints (Supabase Edge Functions)
 const _supabaseBase = import.meta.env.VITE_SUPABASE_URL
 export const API_ENDPOINTS = {
-    WEATHER: `${_supabaseBase}/functions/v1/weather`,
-    GEOCODE: `${_supabaseBase}/functions/v1/geocode`,
-    RECOMMENDATIONS: `${_supabaseBase}/functions/v1/recommendations`,
+    WEATHER:                `${_supabaseBase}/functions/v1/weather`,
+    GEOCODE:                `${_supabaseBase}/functions/v1/geocode`,
+    RECOMMENDATIONS:        `${_supabaseBase}/functions/v1/recommendations`,
+    SEED_TASTE_PROFILE:     `${_supabaseBase}/functions/v1/seed-taste-profile`,
+    UPDATE_TASTE_PROFILE:   `${_supabaseBase}/functions/v1/update-taste-profile`,
+    CHECK_REC_PROXIMITY:    `${_supabaseBase}/functions/v1/check-recommendation-proximity`,
+    COMPUTE_TASTE_SUMMARY:  `${_supabaseBase}/functions/v1/compute-taste-summary`,
+    RECOMMENDATION_SESSION: `${_supabaseBase}/functions/v1/recommendation-session`,
   }
   
   // Google Maps Configuration (Restricted Frontend Key)
