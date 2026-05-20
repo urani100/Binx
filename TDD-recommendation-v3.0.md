@@ -175,6 +175,54 @@ export const corsHeaders = {
 
 ---
 
+### §4.1b `supabase/functions/_shared/weights.ts` — New
+
+Shared weight-update logic imported by `update-taste-profile` and `check-recommendation-proximity`. Centralised here so any change to the learning formula is applied in one place.
+
+```typescript
+import { createClient } from 'npm:@supabase/supabase-js'
+
+const LEARNING_RATE = 0.15
+
+export async function updateWeight(
+  supabase: ReturnType<typeof createClient>,
+  user_id: string,
+  category: string,
+  signal_weight: number,
+  countSignal: boolean = true
+): Promise<void> {
+  const { data } = await supabase
+    .from('users')
+    .select('affinity_weights, signal_count')
+    .eq('id', user_id)
+    .single()
+
+  const weights: Record<string, number> = data?.affinity_weights ?? {}
+  const current = weights[category] ?? 0.5
+  const distance = signal_weight >= 0 ? (1.0 - current) : current
+  const delta = signal_weight * LEARNING_RATE * distance
+  weights[category] = Math.min(1.0, Math.max(0.0, current + delta))
+
+  const currentCount: number = data?.signal_count ?? 0
+  const newCount = countSignal ? currentCount + 1 : currentCount
+
+  await supabase
+    .from('users')
+    .update({
+      affinity_weights: weights,
+      signal_count: newCount,
+      is_cold_start: newCount < 15
+    })
+    .eq('id', user_id)
+}
+```
+
+**`countSignal` parameter:**
+- `true` (default): increments `signal_count` and updates `is_cold_start`. Use for all active engagement signals (`like`, `dismiss`, `directions`, `pin_created`, `pin_anywhere`).
+- `false`: updates weights only, leaves `signal_count` unchanged. Use for `batch_dismissed` — a zero-interaction refresh is a passive non-engagement signal, not a deliberate action, and should not advance the user toward cold-start exit.
+
+---
+
 ### §4.2 `supabase/functions/_shared/prompts.ts` — Full Replacement
 
 Replace the file entirely:
@@ -189,6 +237,7 @@ DISTANCE AND TIME
 - Estimate distance_km as straight-line distance from the user's coordinates to the place
 - Estimate estimated_minutes and set travel_mode: use 'walking' (5 km/h pace) for distances under 2 km; use 'transit' for 2 km and above
 - Do not recommend places more than 15 km away
+- Always provide lat and lng as decimal degrees for every place — use your knowledge of the city to estimate coordinates as accurately as possible
 
 CATEGORY SELECTION BY TIME OF DAY
 - morning (5–12h): cafes, bakeries, parks, bookshops that open early
@@ -254,7 +303,9 @@ export const RECOMMENDATIONS_TOOL = {
             travel_mode:       { type: 'string', enum: ['walking', 'transit'] },
             current_status:    { type: 'string' },
             ai_confidence:     { type: 'number', minimum: 0.60, maximum: 1.0 },
-            tags:              { type: 'array', items: { type: 'string' } }
+            tags:              { type: 'array', items: { type: 'string' } },
+            lat:               { type: 'number', description: 'Estimated decimal latitude of the place' },
+            lng:               { type: 'number', description: 'Estimated decimal longitude of the place' }
           }
         }
       },
@@ -291,7 +342,7 @@ export function buildRecommendationPrompt(params: {
     : ''
 
   const refinementBlock = refinement_context
-    ? `\nUser refinement — RANKED FIRST, HIGH PRIORITY:\nThe user has explicitly requested: ${refinement_context}\nPlace all matching venues at the TOP of the list. Assign them ai_confidence ≥ 0.85. Fill remaining slots with contextually appropriate alternatives.`
+    ? `\nUser refinement — RANKED FIRST, HIGH PRIORITY:\nThe user has explicitly requested: ${refinement_context}\nPlace all matching venues at the TOP of the list. Fill remaining slots with contextually appropriate alternatives.`
     : ''
 
   return `Current Context:
@@ -528,6 +579,7 @@ Handles all feedback actions. Atomically inserts a `recommendation_feedback` row
 ```typescript
 import { createClient } from 'npm:@supabase/supabase-js'
 import { corsHeaders } from '../_shared/cors.ts'
+import { updateWeight } from '../_shared/weights.ts'
 
 const SIGNAL_WEIGHTS: Record<string, number> = {
   pin_created:    1.0,
@@ -537,8 +589,6 @@ const SIGNAL_WEIGHTS: Record<string, number> = {
   dismiss:       -0.4,
   batch_dismissed: -0.1,
 }
-
-const LEARNING_RATE = 0.15
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -606,7 +656,7 @@ async function handleSingle(body: {
 
   // Update affinity weight only when category is known
   if (category) {
-    await updateWeight(user_id, category, signal_weight)
+    await updateWeight(supabase, user_id, category, signal_weight)
   }
 
   // Update atmosphere signals
@@ -651,41 +701,19 @@ async function handleBatchDismiss(body: {
 
   if (fbError) throw fbError
 
-  // Apply weak negative signal to each category
+  // Apply weak negative signal to each category.
+  // countSignal = false — batch_dismissed is a passive non-engagement signal;
+  // it must not advance the user toward cold-start exit.
   const sw = SIGNAL_WEIGHTS['batch_dismissed']
   for (const item of items) {
     if (item.category) {
-      await updateWeight(user_id, item.category, sw)
+      await updateWeight(supabase, user_id, item.category, sw, false)
     }
   }
 
   return new Response(JSON.stringify({ success: true, data: { recorded: items.length } }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   })
-}
-
-async function updateWeight(user_id: string, category: string, signal_weight: number) {
-  const { data } = await supabase
-    .from('users')
-    .select('affinity_weights, signal_count')
-    .eq('id', user_id)
-    .single()
-
-  const weights: Record<string, number> = data?.affinity_weights ?? {}
-  const current = weights[category] ?? 0.5
-  const distance = signal_weight >= 0 ? (1.0 - current) : current
-  const delta = signal_weight * LEARNING_RATE * distance
-  weights[category] = Math.min(1.0, Math.max(0.0, current + delta))
-
-  const newCount = (data?.signal_count ?? 0) + 1
-  await supabase
-    .from('users')
-    .update({
-      affinity_weights: weights,
-      signal_count: newCount,
-      is_cold_start: newCount < 15
-    })
-    .eq('id', user_id)
 }
 
 async function updateAtmosphereSignal(
@@ -759,6 +787,7 @@ Called from `pinsStore` after a pin is inserted. Checks whether the pin location
 ```typescript
 import { createClient } from 'npm:@supabase/supabase-js'
 import { corsHeaders } from '../_shared/cors.ts'
+import { updateWeight } from '../_shared/weights.ts'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -771,7 +800,6 @@ const SIGNAL_WEIGHTS: Record<string, number> = {
   pin_created: 1.0,
   pin_anywhere: 0.6,
 }
-const LEARNING_RATE = 0.15
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -837,7 +865,7 @@ Deno.serve(async (req) => {
 
     // Update affinity weight if category known
     if (category) {
-      await updateWeight(user_id, category, signal_weight)
+      await updateWeight(supabase, user_id, category, signal_weight)
     }
 
     return new Response(JSON.stringify({
@@ -858,29 +886,6 @@ function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number)
     Math.sin(dLat / 2) ** 2 +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-async function updateWeight(user_id: string, category: string, signal_weight: number) {
-  const { data } = await supabase
-    .from('users')
-    .select('affinity_weights, signal_count')
-    .eq('id', user_id)
-    .single()
-
-  const weights: Record<string, number> = data?.affinity_weights ?? {}
-  const current = weights[category] ?? 0.5
-  const distance = signal_weight >= 0 ? (1.0 - current) : current
-  weights[category] = Math.min(1.0, Math.max(0.0, current + signal_weight * LEARNING_RATE * distance))
-
-  const newCount = (data?.signal_count ?? 0) + 1
-  await supabase
-    .from('users')
-    .update({
-      affinity_weights: weights,
-      signal_count: newCount,
-      is_cold_start: newCount < 15
-    })
-    .eq('id', user_id)
 }
 
 function errorResponse(message: string, status: number) {
@@ -1039,16 +1044,17 @@ import { BINX_SYSTEM_PROMPT, RECOMMENDATIONS_TOOL, buildRecommendationPrompt } f
 // Module scope — instantiated once per cold start, reused across requests
 const anthropic = new Anthropic({ apiKey: Deno.env.get('CLAUDE_API_KEY')! })
 
-const hour = new Date().getHours()
-const time_of_day =
-  hour >= 5  && hour < 12 ? 'morning' :
-  hour >= 12 && hour < 17 ? 'afternoon' :
-  hour >= 17 && hour < 21 ? 'evening' : 'night'
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
+
+  // Computed per request — must not be at module scope or it freezes at cold-start time
+  const hour = new Date().getHours()
+  const time_of_day =
+    hour >= 5  && hour < 12 ? 'morning' :
+    hour >= 12 && hour < 17 ? 'afternoon' :
+    hour >= 17 && hour < 21 ? 'evening' : 'night'
 
   const startTime = Date.now()
 
@@ -2153,23 +2159,24 @@ Execute steps in this order. Each step is independently deployable and does not 
 |------|--------|-------|
 | 1 | Run database migration | Supabase SQL editor |
 | 2 | Update `_shared/cors.ts` | `supabase/functions/_shared/cors.ts` |
-| 3 | Replace `_shared/prompts.ts` | `supabase/functions/_shared/prompts.ts` |
-| 4 | Add API endpoint constants | `src/utils/constants.js` |
-| 5 | Add `getCurrentTimeOfDay` helper | `src/utils/helpers.js` |
-| 6 | Update `uiStore.js` | `src/store/uiStore.js` |
-| 7 | Update `authStore.js` | `src/store/authStore.js` |
-| 8 | Deploy `compute-taste-summary` | `supabase/functions/compute-taste-summary/index.ts` |
-| 9 | Deploy `seed-taste-profile` | `supabase/functions/seed-taste-profile/index.ts` |
-| 10 | Deploy `update-taste-profile` | `supabase/functions/update-taste-profile/index.ts` |
-| 11 | Deploy `check-recommendation-proximity` | `supabase/functions/check-recommendation-proximity/index.ts` |
-| 12 | Deploy `recommendation-session` | `supabase/functions/recommendation-session/index.ts` |
-| 13 | Deploy updated `recommendations` | `supabase/functions/recommendations/index.ts` |
-| 14 | Update `EnhancedOnboardingModal.jsx` | `src/components/profile/EnhancedOnboardingModal.jsx` |
-| 15 | Update `pinsStore.js` | `src/store/pinsStore.js` |
-| 16 | Update `RecommendationCard.jsx` | `src/components/shared/RecommendationCard.jsx` |
-| 17 | Update `RecommendationsModal.jsx` | `src/components/shared/RecommendationsModal.jsx` |
+| 3 | Create `_shared/weights.ts` | `supabase/functions/_shared/weights.ts` |
+| 4 | Replace `_shared/prompts.ts` | `supabase/functions/_shared/prompts.ts` |
+| 5 | Add API endpoint constants | `src/utils/constants.js` |
+| 6 | Add `getCurrentTimeOfDay` helper | `src/utils/helpers.js` |
+| 7 | Update `uiStore.js` | `src/store/uiStore.js` |
+| 8 | Update `authStore.js` | `src/store/authStore.js` |
+| 9 | Deploy `compute-taste-summary` | `supabase/functions/compute-taste-summary/index.ts` |
+| 10 | Deploy `seed-taste-profile` | `supabase/functions/seed-taste-profile/index.ts` |
+| 11 | Deploy `update-taste-profile` | `supabase/functions/update-taste-profile/index.ts` |
+| 12 | Deploy `check-recommendation-proximity` | `supabase/functions/check-recommendation-proximity/index.ts` |
+| 13 | Deploy `recommendation-session` | `supabase/functions/recommendation-session/index.ts` |
+| 14 | Deploy updated `recommendations` | `supabase/functions/recommendations/index.ts` |
+| 15 | Update `EnhancedOnboardingModal.jsx` | `src/components/profile/EnhancedOnboardingModal.jsx` |
+| 16 | Update `pinsStore.js` | `src/store/pinsStore.js` |
+| 17 | Update `RecommendationCard.jsx` | `src/components/shared/RecommendationCard.jsx` |
+| 18 | Update `RecommendationsModal.jsx` | `src/components/shared/RecommendationsModal.jsx` |
 
-Steps 8–13 are edge function deploys: `supabase functions deploy <function-name>`.
+Steps 9–14 are edge function deploys: `supabase functions deploy <function-name>`.
 
 Steps 14–17 are client changes that depend on steps 1–13 being live. Deploy them together as a single frontend release.
 
@@ -2205,3 +2212,13 @@ Every issue identified during review is resolved inline in the section above. Re
 | 22 | `topN`/`bottomN`/`topFreq` undefined | §4.3 (defined inline) |
 | 23 | `is_cold_start` flow across boundaries | §4.3 returns it → §5.8 passes it → §4.8 echoes it |
 | 24 | `setSessionId`/`setCurrentSessionPlaces` call sites | §5.8 (`generateRecommendations` step 2 block) |
+
+**Post-review fixes (v3.0 → v3.1):**
+
+| # | Issue | Resolved in |
+|---|-------|-------------|
+| R1 | Confidence inflation on refinement (`ai_confidence ≥ 0.85`) | §4.2 `buildRecommendationPrompt` — line removed |
+| R2 | `time_of_day` frozen at cold-start time (module scope) | §4.8 — moved inside `Deno.serve()` |
+| R3 | `lat`/`lng` absent from tool schema; proximity always null | §4.2 tool schema — fields added; system prompt instructs Claude to provide them |
+| R4 | `updateWeight` duplicated across two edge functions | §4.1b — extracted to `_shared/weights.ts`; both functions import from it |
+| R5 | `batch_dismissed` increments `signal_count` (should not) | §4.1b `countSignal` parameter; §4.5 `handleBatchDismiss` passes `false` |
