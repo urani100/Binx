@@ -232,6 +232,27 @@ export const useUIStore = create(
         })
       },
 
+      appendRecommendation: (recommendation) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            currentRecommendations: [...get().recommendationsModal.currentRecommendations, recommendation]
+          }
+        })
+      },
+
+      setSessionComplete: (sessionId, sessionPlaces) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            sessionId,
+            currentSessionPlaces: sessionPlaces,
+            loading: false,
+            error: null
+          }
+        })
+      },
+
       setCurrentRecommendations: (recommendations, cacheKey = null) => {
         set({
           recommendationsModal: {

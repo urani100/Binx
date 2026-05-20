@@ -30,9 +30,9 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
     }, [isOpen])
 
     const handleRemove = async (recommendationName) => {
-        const updatedSaved = savedRecommendations.filter(r => r.name !== recommendationName)
         removeFromSavedRecommendations(recommendationName)
-        await updateProfile({ savedLocations: updatedSaved })
+        const fresh = useUIStore.getState().recommendationsModal.savedRecommendations
+        await updateProfile({ savedLocations: fresh })
         showMessage('Removed', 'Location removed from saved list')
     }
 
@@ -73,9 +73,9 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
                 {/* Saved list */}
                 {savedRecommendations.length > 0 && (
                     <div className="flex flex-col gap-4">
-                        {savedRecommendations.map((rec, index) => (
+                        {savedRecommendations.map((rec) => (
                             <RecommendationCard
-                                key={`saved-${index}`}
+                                key={rec.name}
                                 recommendation={rec}
                                 onRemove={() => handleRemove(rec.name)}
                                 onDirections={() => handleDirections(rec)}
