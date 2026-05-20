@@ -9,6 +9,8 @@
  import React, { useState, useEffect } from 'react'
  import PropTypes from 'prop-types'
  import { useAuth } from '../../hooks/useAuth'
+ import { API_ENDPOINTS } from '../../utils/constants'
+ import { edgeFunctionHeaders } from '../../services/supabase'
  
  const EnhancedOnboardingModal = ({ isOpen, onClose, onComplete }) => {
      const { updateProfile, user } = useAuth() 
@@ -18,30 +20,27 @@
      
      // Form state for all preferences
      const [preferences, setPreferences] = useState({
-         cuisinePreferences: [],
-         activityTypes: [],
-         priceComfort: 'mid-range',
-         discoveryStyle: 'hidden-gems',
-         socialPreference: 'intimate-pairs',
+         cuisinePreferences:   [],
+         activityTypes:        [],
+         priceComfort:         null,
+         discoveryStyle:       null,
+         socialPreference:     null,
          aestheticPreferences: [],
          avoidancePreferences: []
      })
  
-     // Reset form when modal opens and initialize with existing data
      useEffect(() => {
          if (isOpen) {
              setStep(0)
-             
-             // Initialize form with existing data if available
              if (user?.profile?.enhancedOnboardingCompleted) {
                  setPreferences({
-                     cuisinePreferences: user.profile.cuisinePreferences || [],
-                     activityTypes: user.profile.activityTypes || [],
-                     priceComfort: user.profile.priceComfort || 'mid-range',
-                     discoveryStyle: user.profile.discoveryStyle || 'hidden-gems',
-                     socialPreference: user.profile.socialPreference || 'intimate-pairs',
-                     aestheticPreferences: user.profile.aestheticPreferences || [],
-                     avoidancePreferences: user.profile.avoidancePreferences || []
+                     cuisinePreferences:   user.profile.cuisinePreferences   ?? [],
+                     activityTypes:        user.profile.activityTypes        ?? [],
+                     priceComfort:         user.profile.priceComfort         ?? null,
+                     discoveryStyle:       user.profile.discoveryStyle       ?? null,
+                     socialPreference:     user.profile.socialPreference     ?? null,
+                     aestheticPreferences: user.profile.aestheticPreferences ?? [],
+                     avoidancePreferences: user.profile.avoidancePreferences ?? []
                  })
              }
          }
@@ -67,18 +66,18 @@
      ]
   
      const discoveryOptions = [
-         { value: 'hidden-gems', label: 'Hidden gems & local secrets' },
-         { value: 'popular-spots', label: 'Popular & well-known places' },
-         { value: 'trending-new', label: 'Trending & newly opened' },
+         { value: 'hidden-gems',  label: 'Hidden gems & local secrets' },
+         { value: 'popular',      label: 'Popular & well-known places' },
+         { value: 'trending',     label: 'Trending & newly opened' },
          { value: 'word-of-mouth', label: 'Word-of-mouth recommendations' },
-         { value: 'established-favorites', label: 'Established favorites' }
+         { value: 'established',  label: 'Established favorites' }
      ]
-  
+
      const socialOptions = [
-         { value: 'solo-explorer', label: 'Solo explorer' },
-         { value: 'intimate-pairs', label: 'Intimate pairs/couples' },
-         { value: 'small-groups', label: 'Small groups (3-5 people)' },
-         { value: 'social-butterfly', label: 'Large groups & social scenes' }
+         { value: 'solo',        label: 'Solo explorer' },
+         { value: 'intimate',    label: 'Intimate pairs/couples' },
+         { value: 'small-group', label: 'Small groups (3–5 people)' },
+         { value: 'large-group', label: 'Large groups & social scenes' }
      ]
   
      const aestheticOptions = [
@@ -126,24 +125,25 @@
          onClose()
      }
   
-     // SINGLE handleSave function with verification
      const handleSave = async () => {
          setLoading(true)
-         
          try {
-             
              await updateProfile({
                  ...preferences,
                  enhancedOnboardingCompleted: true
              })
-             
-             
-             // Success - same pattern as basic onboarding
+
+             // Fire-and-forget — initialise taste profile weights on the server
+             fetch(API_ENDPOINTS.SEED_TASTE_PROFILE, {
+                 method: 'POST',
+                 headers: edgeFunctionHeaders,
+                 body: JSON.stringify({ user_id: user.id, preferences })
+             }).catch(console.error)
+
              onComplete?.()
              onClose()
          } catch (error) {
              console.error('Enhanced onboarding failed:', error)
-             // Could add error message here if needed
          } finally {
              setLoading(false)
          }

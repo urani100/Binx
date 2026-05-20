@@ -49,7 +49,10 @@ export const useUIStore = create(
         currentRecommendations: [],
         savedRecommendations: [],
         cacheKey: null,
-        lastUpdated: null
+        lastUpdated: null,
+        sessionId: null,
+        currentSessionPlaces: [],
+        interactionCount: 0,
       },
       locationsModal: {
         isOpen: false
@@ -294,6 +297,44 @@ export const useUIStore = create(
         })
       },
 
+      setSessionId: (sessionId) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            sessionId
+          }
+        })
+      },
+
+      setCurrentSessionPlaces: (places) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            currentSessionPlaces: places
+          }
+        })
+      },
+
+      incrementInteractionCount: () => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            interactionCount: get().recommendationsModal.interactionCount + 1
+          }
+        })
+      },
+
+      resetSession: () => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            sessionId: null,
+            currentSessionPlaces: [],
+            interactionCount: 0
+          }
+        })
+      },
+
       /**
        * Navigation Management
        */
@@ -361,7 +402,10 @@ export const useUIStore = create(
             currentRecommendations: [],
             savedRecommendations: [],
             cacheKey: null,
-            lastUpdated: null
+            lastUpdated: null,
+            sessionId: null,
+            currentSessionPlaces: [],
+            interactionCount: 0,
           },
           selectedPin: null,
           showPinCreation: false,
@@ -387,9 +431,11 @@ export const useUIStore = create(
             currentRecommendations: [],
             savedRecommendations: [],
             cacheKey: null,
-            lastUpdated: null
+            lastUpdated: null,
+            sessionId: null,
+            currentSessionPlaces: [],
+            interactionCount: 0,
           },
-            
           showPinCreation: false,
           showUserProfile: false
         })

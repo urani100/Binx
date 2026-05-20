@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { supabase } from '../services/supabase'
-import { DEMO_USER, DEMO_PINS } from '../utils/constants'
-import { sortPinsByTimestamp, dataURLtoFile, blobToFile } from '../utils/helpers'
+import { DEMO_USER, DEMO_PINS, MOODS, API_ENDPOINTS } from '../utils/constants'
+import { sortPinsByTimestamp, dataURLtoFile, blobToFile, getCurrentTimeOfDay } from '../utils/helpers'
 import { handleSupabaseError } from '../services/errorInterceptor'
+import { edgeFunctionHeaders } from '../services/supabase'
 
 const uploadFileToBucket = async (file, bucket, path) => {
   if (!file) return null
@@ -138,6 +139,8 @@ export const usePinsStore = create((set, get) => ({
         uploadedAudioUrl = await uploadFileToBucket(audioFile, 'pin-assets', `${currentUserId}/${pinId}/audio.${extension}`)
       }
 
+      const moodEntry = MOODS.find(m => m.name === newPin.mood) ?? null
+
       const pinData = {
         id: pinId,
         user_id: currentUserId,
@@ -148,11 +151,33 @@ export const usePinsStore = create((set, get) => ({
         cultural_context: newPin.culturalContext || 'Personal discovery',
         photo: uploadedPhotoUrl,
         audio_url: uploadedAudioUrl,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        vibe_title:         moodEntry?.name ?? null,
+        mood_cluster:       moodEntry ? moodEntry.cat.charAt(0).toUpperCase() + moodEntry.cat.slice(1) : null,
+        sub_mood:           moodEntry?.sub ?? null,
+        energy_description: moodEntry?.desc ?? null,
+        source:             'personal',
       }
 
       const { error } = await supabase.from('pins').insert(pinData)
       if (error) throw error
+
+      // Fire-and-forget — does not affect pin creation success
+      const pinLat = newPin.location?.lat ?? null
+      const pinLng = newPin.location?.lng ?? null
+      if (pinLat != null && pinLng != null) {
+        fetch(API_ENDPOINTS.CHECK_REC_PROXIMITY, {
+          method: 'POST',
+          headers: edgeFunctionHeaders,
+          body: JSON.stringify({
+            user_id: currentUserId,
+            pin_lat: pinLat,
+            pin_lng: pinLng,
+            time_of_day: getCurrentTimeOfDay(),
+            weather_condition: null
+          })
+        }).catch(console.error)
+      }
 
       set({ loading: false })
       return { success: true }

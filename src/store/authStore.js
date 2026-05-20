@@ -36,6 +36,10 @@ export const useAuthStore = create(
               email: supabaseUser.email,
               name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
               profilePic: supabaseUser.user_metadata?.avatar_url || existingProfile?.profilePic || null,
+              affinity_weights:   null,
+              atmosphere_signals: null,
+              signal_count:       0,
+              is_cold_start:      true,
               profile: existingProfile || {
                 alterEgo: '',
                 currentResidence: '',
@@ -51,9 +55,9 @@ export const useAuthStore = create(
                 onboardingCompleted: false,
                 cuisinePreferences: [],
                 activityTypes: [],
-                priceComfort: 'mid-range',
-                discoveryStyle: 'hidden-gems',
-                socialPreference: 'intimate-pairs',
+                priceComfort: null,
+                discoveryStyle: null,
+                socialPreference: null,
                 aestheticPreferences: [],
                 avoidancePreferences: [],
                 enhancedOnboardingCompleted: false,
@@ -78,7 +82,7 @@ export const useAuthStore = create(
         try {
           const { data } = await supabase
             .from('users')
-            .select('profile')
+            .select('profile, affinity_weights, atmosphere_signals, signal_count, is_cold_start')
             .eq('id', userId)
             .single()
 
@@ -89,28 +93,32 @@ export const useAuthStore = create(
               user: {
                 ...user,
                 profilePic: user.profilePic || saved.profilePic || null,
+                affinity_weights:   data?.affinity_weights ?? null,
+                atmosphere_signals: data?.atmosphere_signals ?? null,
+                signal_count:       data?.signal_count ?? 0,
+                is_cold_start:      data?.is_cold_start ?? true,
                 profile: {
-                  alterEgo: saved.alterEgo || '',
-                  currentResidence: saved.currentResidence || '',
-                  occupation: saved.occupation || '',
-                  currentlyReading: saved.currentlyReading || '',
-                  lastMovieWatched: saved.lastMovieWatched || '',
-                  nextMovie: saved.nextMovie || '',
-                  currentlyWearing: saved.currentlyWearing || '',
-                  favoriteBrand: saved.favoriteBrand || '',
-                  favoriteAuthors: saved.favoriteAuthors || '',
-                  favoriteVibe: saved.favoriteVibe || '',
-                  idealSunday: saved.idealSunday || '',
-                  onboardingCompleted: saved.onboardingCompleted || false,
-                  cuisinePreferences: saved.cuisinePreferences || [],
-                  activityTypes: saved.activityTypes || [],
-                  priceComfort: saved.priceComfort || 'mid-range',
-                  discoveryStyle: saved.discoveryStyle || 'hidden-gems',
-                  socialPreference: saved.socialPreference || 'intimate-pairs',
-                  aestheticPreferences: saved.aestheticPreferences || [],
-                  avoidancePreferences: saved.avoidancePreferences || [],
-                  enhancedOnboardingCompleted: saved.enhancedOnboardingCompleted || false,
-                  savedLocations: saved.savedLocations || []
+                  alterEgo:                    saved.alterEgo ?? '',
+                  currentResidence:            saved.currentResidence ?? '',
+                  occupation:                  saved.occupation ?? '',
+                  currentlyReading:            saved.currentlyReading ?? '',
+                  lastMovieWatched:            saved.lastMovieWatched ?? '',
+                  nextMovie:                   saved.nextMovie ?? '',
+                  currentlyWearing:            saved.currentlyWearing ?? '',
+                  favoriteBrand:               saved.favoriteBrand ?? '',
+                  favoriteAuthors:             saved.favoriteAuthors ?? '',
+                  favoriteVibe:                saved.favoriteVibe ?? '',
+                  idealSunday:                 saved.idealSunday ?? '',
+                  onboardingCompleted:         saved.onboardingCompleted ?? false,
+                  cuisinePreferences:          saved.cuisinePreferences ?? [],
+                  activityTypes:               saved.activityTypes ?? [],
+                  priceComfort:                saved.priceComfort ?? null,
+                  discoveryStyle:              saved.discoveryStyle ?? null,
+                  socialPreference:            saved.socialPreference ?? null,
+                  aestheticPreferences:        saved.aestheticPreferences ?? [],
+                  avoidancePreferences:        saved.avoidancePreferences ?? [],
+                  enhancedOnboardingCompleted: saved.enhancedOnboardingCompleted ?? false,
+                  savedLocations:              saved.savedLocations ?? []
                 }
               },
               profileLoaded: true
