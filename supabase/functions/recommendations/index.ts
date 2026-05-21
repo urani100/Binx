@@ -1,14 +1,17 @@
 import Anthropic from 'npm:@anthropic-ai/sdk'
 import { corsHeaders } from '../_shared/cors.ts'
-import { BINX_SYSTEM_PROMPT, buildRecommendationsTool, buildRecommendationPrompt } from '../_shared/prompts.ts'
+import { BINX_SYSTEM_PROMPT, buildRecommendationPrompt } from '../_shared/prompts.ts'
 
 // Module scope — instantiated once per cold start, reused across requests
 const anthropic = new Anthropic({ apiKey: Deno.env.get('CLAUDE_API_KEY')! })
 
-// Tracks brace depth in the streaming partial JSON to extract complete recommendation objects
-class RecommendationExtractor {
+// Extracts complete recommendation objects from Claude's streaming text output.
+// Activates once the <recommendations> tag is seen, then uses brace-depth
+// tracking to emit each complete JSON object as it arrives.
+class TextExtractor {
   private accumulated = ''
   private scanPos = 0
+  private inRecsBlock = false
   private inArray = false
   private depth = 0
   private objStart = -1
@@ -19,35 +22,26 @@ class RecommendationExtractor {
     this.accumulated += chunk
     const results: Record<string, unknown>[] = []
 
+    if (!this.inRecsBlock) {
+      const tagPos = this.accumulated.indexOf('<recommendations>')
+      if (tagPos === -1) return results
+      this.inRecsBlock = true
+      this.scanPos = tagPos + '<recommendations>'.length
+    }
+
     while (this.scanPos < this.accumulated.length) {
+      if (this.accumulated.startsWith('</recommendations>', this.scanPos)) break
+
       const ch = this.accumulated[this.scanPos]
 
-      if (this.escape) {
-        this.escape = false
-        this.scanPos++
-        continue
-      }
-      if (ch === '\\' && this.inStr) {
-        this.escape = true
-        this.scanPos++
-        continue
-      }
-      if (ch === '"') {
-        this.inStr = !this.inStr
-        this.scanPos++
-        continue
-      }
-      if (this.inStr) {
-        this.scanPos++
-        continue
-      }
+      if (this.escape) { this.escape = false; this.scanPos++; continue }
+      if (ch === '\\' && this.inStr) { this.escape = true; this.scanPos++; continue }
+      if (ch === '"') { this.inStr = !this.inStr; this.scanPos++; continue }
+      if (this.inStr) { this.scanPos++; continue }
 
       if (!this.inArray) {
-        if (ch === '[') {
-          const preceding = this.accumulated.slice(0, this.scanPos)
-          if (preceding.includes('"recommendations"')) {
-            this.inArray = true
-          }
+        if (ch === '[' && this.accumulated.slice(0, this.scanPos).includes('"recommendations"')) {
+          this.inArray = true
         }
       } else {
         if (ch === '{') {
@@ -57,11 +51,7 @@ class RecommendationExtractor {
           this.depth--
           if (this.depth === 0 && this.objStart !== -1) {
             const objStr = this.accumulated.slice(this.objStart, this.scanPos + 1)
-            try {
-              results.push(JSON.parse(objStr))
-            } catch {
-              // skip malformed fragment
-            }
+            try { results.push(JSON.parse(objStr)) } catch { /* skip malformed */ }
             this.objStart = -1
           }
         }
@@ -79,7 +69,6 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // Computed per request
   const hour = new Date().getHours()
   const time_of_day =
     hour >= 5  && hour < 12 ? 'morning' :
@@ -155,32 +144,29 @@ Deno.serve(async (req) => {
 
   const session_id = crypto.randomUUID()
   const encoder = new TextEncoder()
-  const hasRefinement = !!refinement_context
 
   const responseBody = new ReadableStream({
     async start(controller) {
-      const extractor = new RecommendationExtractor()
+      const extractor = new TextExtractor()
 
       try {
         const response = await anthropic.messages.create({
           model: 'claude-sonnet-4-6',
-          max_tokens: 2048,
+          max_tokens: 8192,
           stream: true,
           system: [{ type: 'text', text: BINX_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-          tools: [{ ...buildRecommendationsTool(hasRefinement), cache_control: { type: 'ephemeral' } }],
-          tool_choice: { type: 'tool', name: 'generate_recommendations' },
           messages: [{ role: 'user', content: prompt }],
         })
 
-        let fullInputJson = ''
+        let fullText = ''
 
         for await (const event of response) {
           if (
             event.type === 'content_block_delta' &&
-            event.delta.type === 'input_json_delta'
+            event.delta.type === 'text_delta'
           ) {
-            const chunk = event.delta.partial_json
-            fullInputJson += chunk
+            const chunk = event.delta.text
+            fullText += chunk
             const recs = extractor.feed(chunk)
             for (const rec of recs) {
               const enriched = { ...rec, lat: (rec.lat as number) ?? null, lng: (rec.lng as number) ?? null }
@@ -193,8 +179,11 @@ Deno.serve(async (req) => {
 
         let reasoning = ''
         try {
-          const parsed = JSON.parse(fullInputJson)
-          reasoning = typeof parsed.reasoning === 'string' ? parsed.reasoning : ''
+          const match = fullText.match(/<recommendations>([\s\S]*?)<\/recommendations>/)
+          if (match) {
+            const parsed = JSON.parse(match[1].trim())
+            reasoning = typeof parsed.reasoning === 'string' ? parsed.reasoning : ''
+          }
         } catch { /* reasoning is optional */ }
 
         controller.enqueue(

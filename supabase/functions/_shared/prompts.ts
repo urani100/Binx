@@ -43,50 +43,6 @@ QUALITY BAR
 - If uncertain about a specific detail, omit it rather than guess
 - Prioritize recency — avoid recommending places that may have closed`
 
-export function buildRecommendationsTool(hasRefinement = false) {
-  return {
-    name: 'generate_recommendations',
-    description: 'Generate location recommendations for the user based on their current context and learned taste profile.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        recommendations: {
-          type: 'array',
-          minItems: hasRefinement ? 1 : 7,
-          maxItems: 10,
-          items: {
-            type: 'object',
-            required: ['name', 'address', 'category', 'vibe_match_reason', 'distance_km', 'estimated_minutes', 'travel_mode', 'ai_confidence', 'tags'],
-            properties: {
-              name:              { type: 'string' },
-              address:           { type: 'string' },
-              category:          {
-                type: 'string',
-                enum: [
-                  'cafe', 'restaurant', 'park', 'gallery', 'bar', 'cocktail-bar',
-                  'museum', 'bookshop', 'market', 'live-music', 'rooftop', 'bakery',
-                  'spa', 'cinema', 'jazz-club', 'wine-bar', 'gelateria', 'late-night'
-                ]
-              },
-              vibe_match_reason: { type: 'string', description: 'Why this place matches the user — max 20 words' },
-              distance_km:       { type: 'number' },
-              estimated_minutes: { type: 'integer' },
-              travel_mode:       { type: 'string', enum: ['walking', 'transit'] },
-              current_status:    { type: 'string' },
-              ai_confidence:     { type: 'number', minimum: 0.60, maximum: 1.0 },
-              tags:              { type: 'array', items: { type: 'string' } },
-              lat:               { type: 'number', description: 'Estimated decimal latitude of the place' },
-              lng:               { type: 'number', description: 'Estimated decimal longitude of the place' }
-            }
-          }
-        },
-        reasoning: { type: 'string', description: 'Brief strategy behind these picks — max 30 words' }
-      },
-      required: ['recommendations', 'reasoning']
-    }
-  }
-}
-
 export function buildRecommendationPrompt(params: {
   current_location: { lat: number; lng: number; address: string; neighborhood: string }
   weather_data: { condition: string; temperature: number; is_real: boolean }
@@ -107,42 +63,70 @@ export function buildRecommendationPrompt(params: {
 
   const weatherNote = weather_data.is_real ? '' : ' (estimated)'
   const coldStartNote = is_cold_start
-    ? '\nNote: This user is new — lean toward crowd-pleasing, well-known venues over niche picks.'
+    ? '\nNew user — lean toward crowd-pleasing, well-known venues over niche picks.'
     : ''
 
-  // Priority 1: hard exclusions — avoided categories and already-seen places
-  const hardExclusionParts: string[] = []
+  const constraintParts: string[] = []
   if (avoided_categories.length > 0) {
-    hardExclusionParts.push(`Avoided categories (do not recommend under any alias): ${avoided_categories.join(', ')}`)
+    constraintParts.push(`Avoided categories (do not recommend under any alias): ${avoided_categories.join(', ')}`)
   }
   if (excluded_places.length > 0) {
-    hardExclusionParts.push(`Excluded places (do not recommend under any name or alias): ${excluded_places.join(', ')}`)
+    constraintParts.push(`Excluded places (do not recommend under any name or alias): ${excluded_places.join(', ')}`)
   }
-  const hardExclusionBlock = hardExclusionParts.length > 0
-    ? `\n${hardExclusionParts.join('\n')}`
-    : ''
-
-  // Priority 2: strict filters — override variety rules when present
-  const refinementBlock = refinement_context
-    ? `\nUser refinement — STRICT FILTER, HIGH PRIORITY:\nThe user has explicitly requested: ${refinement_context}\nReturn ONLY venues that strictly match ALL of the requested criteria. Do not apply variety rules from the system prompt.`
-    : ''
+  if (refinement_context) {
+    constraintParts.push(`Strict filter — overrides variety rules. Return ONLY venues matching ALL of: ${refinement_context}`)
+  }
+  const constraintsBlock = constraintParts.length > 0 ? constraintParts.join('\n') : 'None.'
 
   const closingInstruction = refinement_context
     ? 'Return only venues that match all specified criteria above.'
     : 'Generate a variety of recommendations that honour this taste profile and the current context.'
 
-  return `Current Context:
+  return `<context>
 Location: ${current_location.address} (${current_location.neighborhood})
 Coordinates: ${current_location.lat.toFixed(5)}, ${current_location.lng.toFixed(5)}
 Weather: ${weather_data.condition}${weatherNote}, ${weather_data.temperature}°C
 Time: ${time_of_day}
-${coldStartNote}
-User Taste Profile:
+</context>
+
+<taste_profile>
 ${taste_summary}
 
 Who they are: ${identity_narrative}
-What they're after: ${vibe_narrative}
-${hardExclusionBlock}${refinementBlock}
+What they're after: ${vibe_narrative}${coldStartNote}
+</taste_profile>
+
+<constraints>
+${constraintsBlock}
+</constraints>
+
+Think through your approach, then respond in this exact format:
+
+<scratchpad>
+[Your reasoning: time/weather → venue types, taste profile → preferences, exclusions/filters, category distribution]
+</scratchpad>
+
+<recommendations>
+{
+  "recommendations": [
+    {
+      "name": "string",
+      "address": "string",
+      "category": "cafe|restaurant|park|gallery|bar|cocktail-bar|museum|bookshop|market|live-music|rooftop|bakery|spa|cinema|jazz-club|wine-bar|gelateria|late-night",
+      "vibe_match_reason": "string — max 20 words",
+      "distance_km": 0.0,
+      "estimated_minutes": 0,
+      "travel_mode": "walking|transit",
+      "current_status": "string (optional, only when confident)",
+      "ai_confidence": 0.0,
+      "tags": ["string"],
+      "lat": 0.0,
+      "lng": 0.0
+    }
+  ],
+  "reasoning": "string — max 30 words"
+}
+</recommendations>
 
 ${closingInstruction}`
 }
