@@ -146,7 +146,7 @@
                    value={profileData.alterEgo}
                    onChange={handleChange}
                    placeholder="e.g., The Coder"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -159,7 +159,7 @@
                    value={profileData.currentResidence}
                    onChange={handleChange}
                    placeholder="e.g., Brooklyn"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -172,7 +172,7 @@
                    value={profileData.occupation}
                    onChange={handleChange}
                    placeholder="e.g., Writer, Founder"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -191,7 +191,7 @@
                    value={profileData.currentlyReading}
                    onChange={handleChange}
                    placeholder="e.g., 'Dune' by Frank Herbert"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -204,7 +204,7 @@
                    value={profileData.lastMovieWatched}
                    onChange={handleChange}
                    placeholder="e.g., 'Amélie'"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -217,7 +217,7 @@
                    value={profileData.nextMovie}
                    onChange={handleChange}
                    placeholder="e.g., 'The Matrix'"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -230,7 +230,7 @@
                    value={profileData.favoriteAuthors}
                    onChange={handleChange}
                    placeholder="e.g., Haruki Murakami"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -249,7 +249,7 @@
                    value={profileData.currentlyWearing}
                    onChange={handleChange}
                    placeholder="e.g., A favorite vintage jacket"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -262,7 +262,7 @@
                    value={profileData.favoriteBrand}
                    onChange={handleChange}
                    placeholder="e.g., Nike"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -275,7 +275,7 @@
                    value={profileData.favoriteVibe}
                    onChange={handleChange}
                    placeholder="e.g., Rainy days and jazz music"
-                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                    disabled={loading}
                  />
                </div>
@@ -288,7 +288,7 @@
                    onChange={handleChange}
                    placeholder="e.g., What would you do on your ideal Sundays?"
                    rows="2"
-                   className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+                   className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none outline-none"
                    disabled={loading}
                  />
                </div>

@@ -68,7 +68,7 @@
          {/* Close Button */}
          <button
            onClick={onClose}
-           className="absolute -top-8 -right-8 bg-gray-200 text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl z-50 shadow-md hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+           className="absolute -top-8 -right-8 bg-gray-200 text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl z-50 shadow-md hover:bg-gray-300 transition-colors"
            title="Close photo"
            aria-label="Close photo"
          >

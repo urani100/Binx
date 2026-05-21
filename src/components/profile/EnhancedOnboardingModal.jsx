@@ -175,7 +175,7 @@
                              type="checkbox"
                              checked={preferences[category].includes(option)}
                              onChange={() => handleArrayPreference(category, option)}
-                             className="rounded border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                             className="rounded border-gray-300 text-customPurple"
                              style={{ accentColor: '#bdbdbd' }}
                          />
                          <span className="text-sm text-gray-700 capitalize">
@@ -199,7 +199,7 @@
                              value={option.value}
                              checked={preferences[category] === option.value}
                              onChange={() => handleSinglePreference(category, option.value)}
-                             className="border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                             className="border-gray-300 text-customPurple"
                              style={{ accentColor: '#bdbdbd' }}
                          />
                          <span className="text-sm text-gray-700">{option.label}</span>

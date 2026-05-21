@@ -253,7 +253,7 @@ const LocationsModal = ({ isOpen, onClose }) => {
                 }
               }}
               placeholder="Enter address and press Enter to search"
-              className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+              className="w-full p-3 border border-gray-200 rounded-xl text-sm outline-none"
               aria-label="Location search"
               disabled={isSearchingLocation}
             />

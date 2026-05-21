@@ -324,7 +324,7 @@
                value={newPin.title}
                onChange={(e) => setNewPin(prev => ({ ...prev, title: e.target.value }))}
                placeholder="Golden Hour Gelato"
-               className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent outline-none"
+               className="w-full p-3 border border-gray-100 rounded-xl outline-none"
                aria-describedby="title-help"
              />
            </div>
@@ -378,7 +378,7 @@
                onChange={(e) => setNewPin(prev => ({ ...prev, note: e.target.value }))}
                placeholder="Capture the vibe. The light... the sound... The atmosphere..."
                rows="4"
-               className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent outline-none resize-none"
+               className="w-full p-3 border border-gray-100 rounded-xl outline-none resize-none"
                aria-describedby="note-help"
              />
            </div>
@@ -499,7 +499,7 @@
                }}
              
                placeholder="Enter address and press Enter to search"
-               className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+               className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                aria-label="Location name"
                disabled={isSearchingLocation}
              />

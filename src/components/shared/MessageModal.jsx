@@ -116,7 +116,7 @@
          <div className="flex justify-end">
            <button
              onClick={onClose}
-             className="py-2 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-customPurple focus:ring-offset-2"
+             className="py-2 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
              autoFocus
            >
              OK

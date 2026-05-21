@@ -211,7 +211,7 @@ if (src === 'demo-audio') {
            onClick={togglePlayPause}
            onKeyDown={handleKeyDown}
            disabled={!isLoaded}
-           className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-1"
+           className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
            style={{ backgroundColor: 'var(--color-background)' }}
            aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
            title={isPlaying ? 'Pause' : 'Play'}
