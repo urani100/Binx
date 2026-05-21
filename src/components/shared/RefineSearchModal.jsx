@@ -20,15 +20,12 @@ const RefineSearchModal = ({ onClose, onApply, initial = {}, categoryOptions, pr
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-lg text-left relative">
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-lg text-left">
 
-        <div className="absolute top-6 right-6">
-          <button onClick={onClose} className="text-customPurpleText transition-colors" aria-label="Close">✕</button>
-        </div>
-
-        <div className="flex justify-between items-center mb-6 mt-4">
-          <h2 className="text-xl font-semibold text-customPurpleText">Refine Recommendations</h2>
+        <div className="flex justify-between items-center mb-4">
           <p className="text-sm text-gray-500">Step {step} of 3</p>
+          <h3 className="text-xl font-semibold text-customPurpleText">Refine Recommendations</h3>
+          <button onClick={onClose} className="text-customPurpleText transition-colors" aria-label="Close">✕</button>
         </div>
 
         <h3 className="text-base font-medium text-gray-800 mb-4">{getStepTitle()}</h3>

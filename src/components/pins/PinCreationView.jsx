@@ -293,15 +293,7 @@
        <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left">
  
          {/* Modal Header */}
-         <div className="flex justify-between items-center mb-6">
-           <button
-             onClick={onClose}
-             className="text-customPurpleText transition-colors"
-             aria-label="Close modal"
-           >
-             ✕
-           </button>
-           <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-6">Vibe</h3>
+         <div className="flex justify-between items-center mb-4">
            <button
              onClick={handleSubmit}
              className="text-customPurpleText font-medium disabled:opacity-50 transition-colors"
@@ -309,6 +301,14 @@
              aria-label="Save pin"
            >
              Save
+           </button>
+           <h3 className="text-xl font-semibold text-customPurpleText">Vibe</h3>
+           <button
+             onClick={onClose}
+             className="text-customPurpleText transition-colors"
+             aria-label="Close modal"
+           >
+             ✕
            </button>
          </div>
  
@@ -324,7 +324,7 @@
                value={newPin.title}
                onChange={(e) => setNewPin(prev => ({ ...prev, title: e.target.value }))}
                placeholder="Golden Hour Gelato"
-               className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent outline-none"
+               className="w-full p-3 border border-gray-100 rounded-xl outline-none"
                aria-describedby="title-help"
              />
            </div>
@@ -378,7 +378,7 @@
                onChange={(e) => setNewPin(prev => ({ ...prev, note: e.target.value }))}
                placeholder="Capture the vibe. The light... the sound... The atmosphere..."
                rows="4"
-               className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent outline-none resize-none"
+               className="w-full p-3 border border-gray-100 rounded-xl outline-none resize-none"
                aria-describedby="note-help"
              />
            </div>
@@ -499,7 +499,7 @@
                }}
              
                placeholder="Enter address and press Enter to search"
-               className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-customPurple focus:border-transparent outline-none"
+               className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm outline-none"
                aria-label="Location name"
                disabled={isSearchingLocation}
              />

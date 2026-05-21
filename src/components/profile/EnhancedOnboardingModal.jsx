@@ -9,11 +9,13 @@
  import React, { useState, useEffect } from 'react'
  import PropTypes from 'prop-types'
  import { useAuth } from '../../hooks/useAuth'
+ import { useUIStore } from '../../store/uiStore'
  import { API_ENDPOINTS } from '../../utils/constants'
  import { edgeFunctionHeaders } from '../../services/supabase'
  
  const EnhancedOnboardingModal = ({ isOpen, onClose, onComplete }) => {
-     const { updateProfile, user } = useAuth() 
+     const { updateProfile, user } = useAuth()
+     const showMessage = useUIStore(state => state.showMessageModal)
      const [loading, setLoading] = useState(false)
      const [step, setStep] = useState(0)
      const totalSteps = 6
@@ -140,6 +142,7 @@
                  body: JSON.stringify({ user_id: user.id, preferences })
              }).catch(console.error)
 
+             showMessage('Profile saved')
              onComplete?.()
              onClose()
          } catch (error) {
@@ -172,7 +175,7 @@
                              type="checkbox"
                              checked={preferences[category].includes(option)}
                              onChange={() => handleArrayPreference(category, option)}
-                             className="rounded border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                             className="rounded border-gray-300 text-customPurple"
                              style={{ accentColor: '#bdbdbd' }}
                          />
                          <span className="text-sm text-gray-700 capitalize">
@@ -196,7 +199,7 @@
                              value={option.value}
                              checked={preferences[category] === option.value}
                              onChange={() => handleSinglePreference(category, option.value)}
-                             className="border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                             className="border-gray-300 text-customPurple"
                              style={{ accentColor: '#bdbdbd' }}
                          />
                          <span className="text-sm text-gray-700">{option.label}</span>
@@ -210,25 +213,19 @@
   
      return (
          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-             <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-lg text-left relative">
-                 
-                 {/* Close Button */}
-                 <div className="absolute top-6 right-6">
+             <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-lg text-left">
+
+                 {/* Header */}
+                 <div className="flex justify-between items-center mb-4">
+                     <p className="text-sm text-gray-500">Step {step + 1} of {totalSteps}</p>
+                     <h3 className="text-xl font-semibold text-customPurpleText">Personalize BiNx</h3>
                      <button
                          onClick={onClose}
-                         className="text-gray-400 hover:text-gray-600 transition-colors"
+                         className="text-customPurpleText transition-colors"
                          aria-label="Close modal"
                      >
-                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                         </svg>
+                         ✕
                      </button>
-                 </div>
-  
-                 {/* Header */}
-                 <div className="flex justify-between items-center mb-6 mt-8">
-                     <h2 className="text-2xl font-bold text-customPurpleText">Enhance Your Profile</h2>
-                     <p className="text-sm text-gray-500">Step {step + 1} of {totalSteps}</p>
                  </div>
   
                  {/* Form Fields */}

@@ -113,7 +113,7 @@ const AuthView = () => {
                     placeholder="Name"
                     value={authForm.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full p-3 border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-gray-600 focus:border-transparent ${validationErrors.name ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
+                    className={`w-full p-3 border rounded-xl outline-none transition-colors ${validationErrors.name ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
                     disabled={loading}
                     aria-invalid={!!validationErrors.name}
                     aria-describedby={validationErrors.name ? 'name-error' : undefined}
@@ -130,7 +130,7 @@ const AuthView = () => {
                   placeholder="Email"
                   value={authForm.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full p-3 border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-gray-600 focus:border-transparent ${validationErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
+                  className={`w-full p-3 border rounded-xl outline-none transition-colors ${validationErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
                   disabled={loading}
                   aria-invalid={!!validationErrors.email}
                   aria-describedby={validationErrors.email ? 'email-error' : undefined}
@@ -146,7 +146,7 @@ const AuthView = () => {
                   placeholder="Password"
                   value={authForm.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full p-3 border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-gray-600 focus:border-transparent ${validationErrors.password ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
+                  className={`w-full p-3 border rounded-xl outline-none transition-colors ${validationErrors.password ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
                   disabled={loading}
                   aria-invalid={!!validationErrors.password}
                   aria-describedby={validationErrors.password ? 'password-error' : undefined}

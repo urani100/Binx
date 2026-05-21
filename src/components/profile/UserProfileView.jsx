@@ -195,7 +195,7 @@
              )}
            </div>
  
-           <h2 className="font-medium text-gray-900 mb-2">Hello, {user?.name || 'Friend'}!</h2>
+           <h2 className="font-medium text-gray-400 mb-2">Hello, {user?.name || 'Friend'}!</h2>
            <p className="text-sm text-gray-500">{user?.email}</p>
          </div>
  
@@ -352,7 +352,7 @@
         
          <div className="bg-customBackground rounded-xl p-6 space-y-4 mb-6">
           <h3 className="text-xl font-semibold text-customPurpleText mb-4">What's your vibe?</h3>
-           <h4 className="text-l text-gray-700  mt-4">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
+           <h4 className="text-l text-gray-400  mt-4">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
            
            <div className="flex gap-3">
              <button

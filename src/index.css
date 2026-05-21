@@ -9,6 +9,12 @@
   --color-text: #7e6da8;
 }
 
+/* Remove all focus outlines and rings app-wide */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
 body {
   font-family: 'Cambria', serif;
   color: #636262;

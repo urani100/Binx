@@ -449,7 +449,7 @@ const RefineSearchModal = ({ onClose, onApply, initial, CATEGORY_OPTIONS, PRICE_
                       type="checkbox"
                       checked={types.includes(t)}
                       onChange={() => setTypes(prev => toggle(prev, t))}
-                      className="rounded border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                      className="rounded border-gray-300 text-customPurple"
                       style={{ accentColor: '#bdbdbd' }}
                     />
                     <span className="capitalize">{t.replaceAll('_', ' ')}</span>
@@ -468,7 +468,7 @@ const RefineSearchModal = ({ onClose, onApply, initial, CATEGORY_OPTIONS, PRICE_
                       type="checkbox"
                       checked={prices.includes(p)}
                       onChange={() => setPrices(prev => toggle(prev, p))}
-                      className="rounded border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                      className="rounded border-gray-300 text-customPurple"
                       style={{ accentColor: '#bdbdbd' }}
                     />
                     <span>{'$'.repeat(p)}</span>
@@ -490,7 +490,7 @@ const RefineSearchModal = ({ onClose, onApply, initial, CATEGORY_OPTIONS, PRICE_
                         name="minRating"
                         checked={rating === r}
                         onChange={() => setRating(r)}
-                        className="border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                        className="border-gray-300 text-customPurple"
                         style={{ accentColor: '#bdbdbd' }}
                       />
                       <span>{r === 0 ? 'Any' : `${r.toFixed(1)}+`}</span>
@@ -509,7 +509,7 @@ const RefineSearchModal = ({ onClose, onApply, initial, CATEGORY_OPTIONS, PRICE_
                         name="radius"
                         checked={radius === r}
                         onChange={() => setRadius(r)}
-                        className="border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                        className="border-gray-300 text-customPurple"
                         style={{ accentColor: '#bdbdbd' }}
                       />
                       <span>{r} m</span>
@@ -528,7 +528,7 @@ const RefineSearchModal = ({ onClose, onApply, initial, CATEGORY_OPTIONS, PRICE_
                         name="rank"
                         checked={rank === opt}
                         onChange={() => setRank(opt)}
-                        className="border-gray-300 text-customPurple focus:ring-2 focus:ring-customPurple focus:ring-offset-0 focus:border-transparent"
+                        className="border-gray-300 text-customPurple"
                         style={{ accentColor: '#bdbdbd' }}
                       />
                       <span>{opt.toLowerCase()}</span>
