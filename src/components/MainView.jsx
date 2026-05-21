@@ -134,6 +134,8 @@
          {/* Action Buttons - ENHANCED WITH L BUTTON */}
          <div className="flex justify-end items-center mb-4 space-x-3">
            {/* L Button - NEW LOCATIONS BUTTON */}
+           {/* Hidden — preserved for future use */}
+           {false && (
            <button
              onClick={handleOpenLocations}
              className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-colors shadow-lg text-xs font-medium bg-customPurpleText"
@@ -141,6 +143,7 @@
            >
              <span className="text-base font-semibold">L</span>
            </button>
+           )}
            
            {/* R Button - EXISTING RECOMMENDATIONS */}
            <button
