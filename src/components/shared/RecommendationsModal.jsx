@@ -27,6 +27,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
   const recommendationsModal = useUIStore(state => state.recommendationsModal)
   const showMessage = useUIStore(state => state.showMessageModal)
   const addToSavedRecommendations = useUIStore(state => state.addToSavedRecommendations)
+  const removeFromCurrentRecommendations = useUIStore(state => state.removeFromCurrentRecommendations)
 
   const [showRefine, setShowRefine] = useState(false)
   const [showSaved, setShowSaved] = useState(false)
@@ -205,7 +206,10 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                       onSave={() => handleSaveRecommendation(rec)}
                       onDirections={() => handleGetDirections(rec)}
                       onLike={() => recommendationService.writeFeedback(rec, 'like')}
-                      onDismiss={() => recommendationService.writeFeedback(rec, 'dismiss')}
+                      onDismiss={() => {
+                        recommendationService.writeFeedback(rec, 'dismiss')
+                        removeFromCurrentRecommendations(rec.name)
+                      }}
                       isSaved={savedRecommendations.some(saved => saved.name === rec.name)}
                     />
                   ))}

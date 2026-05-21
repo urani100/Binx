@@ -298,6 +298,15 @@ export const useUIStore = create(
         })
       },
 
+      removeFromCurrentRecommendations: (recommendationName) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            currentRecommendations: get().recommendationsModal.currentRecommendations.filter(r => r.name !== recommendationName)
+          }
+        })
+      },
+
       seedSavedLocations: (locations) => {
         set({
           recommendationsModal: {
