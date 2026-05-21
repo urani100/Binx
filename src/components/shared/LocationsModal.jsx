@@ -224,6 +224,8 @@ const LocationsModal = ({ isOpen, onClose }) => {
 
         {/* Modal Header */}
         <div className="flex justify-between items-center mb-4">
+          <div className="w-5" />
+          <h3 className="text-xl font-semibold text-customPurpleText">Locations</h3>
           <button
             onClick={onClose}
             className="text-customPurpleText transition-colors"
@@ -231,16 +233,6 @@ const LocationsModal = ({ isOpen, onClose }) => {
           >
             ✕
           </button>
-          <h3 className="text-xl font-semibold text-customPurpleText">Locations</h3>
-
-          {/* Revisit functionality is not worlikng properly and is not currrently necesssary */}
-          {/* <button
-             onClick={handleUseCurrentLocation}
-             className="text-customPurpleText font-medium transition-colors"
-             aria-label="Use current location"
-           >
-             Current
-           </button> */}
         </div>
 
         <div className="space-y-4">

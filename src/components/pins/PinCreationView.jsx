@@ -293,7 +293,7 @@
        <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left">
  
          {/* Modal Header */}
-         <div className="flex justify-between items-center mb-6">
+         <div className="flex justify-between items-center mb-4">
            <button
              onClick={onClose}
              className="text-customPurpleText transition-colors"
@@ -301,7 +301,7 @@
            >
              ✕
            </button>
-           <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-6">Vibe</h3>
+           <h3 className="text-xl font-semibold text-customPurpleText pl-6">Vibe</h3>
            <button
              onClick={handleSubmit}
              className="text-customPurpleText font-medium disabled:opacity-50 transition-colors"

@@ -48,8 +48,8 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
             <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left max-h-[90vh] overflow-y-auto">
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-semibold text-customPurpleText">Saved Locations</h3>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-semibold text-customPurpleText">Saved Recommendations</h3>
                     <button
                         onClick={onClose}
                         className="text-customPurpleText transition-colors"
