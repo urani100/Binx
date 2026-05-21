@@ -35,7 +35,7 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
         removeFromSavedRecommendations(recommendationName)
         const fresh = useUIStore.getState().recommendationsModal.savedRecommendations
         await updateProfile({ savedLocations: fresh })
-        showMessage('Removed', 'Location removed from saved list')
+        showMessage('Removed', 'Recommendation removed from saved list')
     }
 
     const handleDirections = (recommendation) => {
