@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase
       .from('users')
-      .select('affinity_weights, atmosphere_signals, signal_count, is_cold_start')
+      .select('affinity_weights, atmosphere_signals, signal_count, is_cold_start, profile')
       .eq('id', user_id)
       .single()
 
@@ -30,9 +30,10 @@ Deno.serve(async (req) => {
     const atmosphere: Record<string, Record<string, number>> = data?.atmosphere_signals ?? {}
     const signal_count: number = data?.signal_count ?? 0
     const is_cold_start: boolean = data?.is_cold_start ?? true
+    const profile: Record<string, unknown> = data?.profile ?? {}
 
     const loved = topN(weights, 0.7, 5)
-    const avoided = bottomN(weights, 0.35)
+    const avoided_categories = bottomN(weights, 0.35)
     const timePrefs = topFreq(atmosphere.time_of_day ?? {}, 2)
     const weatherPrefs = topFreq(atmosphere.weather ?? {}, 2)
 
@@ -41,16 +42,36 @@ Deno.serve(async (req) => {
     let vibe_narrative: string
 
     if (is_cold_start) {
-      taste_summary = 'New user — no strong preferences established yet. Recommend a balanced, crowd-pleasing mix.'
-      identity_narrative = 'Someone exploring the app for the first time.'
-      vibe_narrative = 'Open to discovery — provide variety across categories and price points.'
+      const activityTypes = (profile.activityTypes as string[] | undefined) ?? []
+      const priceComfort = profile.priceComfort as string | undefined
+      const discoveryStyle = profile.discoveryStyle as string | undefined
+      const socialPreference = profile.socialPreference as string | undefined
+
+      const hasOnboarding = activityTypes.length > 0 || priceComfort || discoveryStyle || socialPreference
+
+      if (hasOnboarding) {
+        const parts: string[] = []
+        if (activityTypes.length > 0) parts.push(`Interested in: ${activityTypes.join(', ')}`)
+        if (priceComfort) parts.push(`Price comfort: ${priceComfort}`)
+        if (discoveryStyle) parts.push(`Discovery style: ${discoveryStyle}`)
+        if (socialPreference) parts.push(`Social preference: ${socialPreference}`)
+
+        taste_summary = `New user with onboarding preferences. ${parts.join('. ')}.`
+        identity_narrative = `Someone who selected ${activityTypes.length > 0 ? activityTypes.join(', ') : 'varied interests'} during onboarding.`
+        vibe_narrative = discoveryStyle
+          ? `Wants to ${discoveryStyle === 'hidden_gems' ? 'discover hidden gems off the beaten path' : discoveryStyle === 'popular_spots' ? 'visit popular well-known spots' : 'explore a mix of well-known and hidden spots'}.`
+          : 'Open to discovery — provide variety across categories and price points.'
+      } else {
+        taste_summary = 'New user — no strong preferences established yet. Recommend a balanced, crowd-pleasing mix.'
+        identity_narrative = 'Someone exploring the app for the first time.'
+        vibe_narrative = 'Open to discovery — provide variety across categories and price points.'
+      }
     } else {
       const lovedStr = loved.length > 0 ? loved.join(', ') : 'no strong category preferences yet'
-      const avoidedStr = avoided.length > 0 ? `Tends to avoid: ${avoided.join(', ')}.` : ''
       const timeStr = timePrefs.length > 0 ? `Most active during: ${timePrefs.join(' and ')}.` : ''
       const weatherStr = weatherPrefs.length > 0 ? `Engages more in: ${weatherPrefs.join(' and ')} conditions.` : ''
 
-      taste_summary = `Affinity profile (${signal_count} signals): Gravitates toward ${lovedStr}. ${avoidedStr} ${timeStr} ${weatherStr}`.trim()
+      taste_summary = `Affinity profile (${signal_count} signals): Gravitates toward ${lovedStr}. ${timeStr} ${weatherStr}`.trim()
       identity_narrative = `A user with ${signal_count} recorded signals who has shown consistent preference for ${lovedStr}.`
       vibe_narrative = loved.length > 0
         ? `Looking for ${loved.slice(0, 3).join(', ')} experiences that match their established taste.`
@@ -59,7 +80,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       success: true,
-      data: { taste_summary, identity_narrative, vibe_narrative, is_cold_start }
+      data: { taste_summary, identity_narrative, vibe_narrative, is_cold_start, avoided_categories }
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (error) {

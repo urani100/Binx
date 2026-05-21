@@ -2,13 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useAuth } from '../../hooks/useAuth'
 import { useLocation } from '../../hooks/useLocation'
-import { usePins } from '../../hooks/usePins'
 import { useUIStore } from '../../store/uiStore'
-import { useLocationStore } from '../../store/locationStore'
-import { LoadingSpinner } from '../ui'
-import { API_ENDPOINTS } from '../../utils/constants'
-import { edgeFunctionHeaders } from '../../services/supabase'
-import { getCurrentTimeOfDay } from '../../utils/helpers'
+import * as recommendationService from '../../services/recommendationService'
 import RecommendationCard from './RecommendationCard'
 import RefineSearchModal from './RefineSearchModal'
 import SavedLocationsModal from './SavedLocationsModal'
@@ -22,44 +17,22 @@ const REC_CATEGORY_OPTIONS = [
 ]
 const REC_PRICE_OPTIONS = [1, 2, 3, 4]
 
-const buildRefinementContext = (filters) => {
-  const parts = []
-  if (filters.types?.length) parts.push(`Venue types: ${filters.types.join(', ')}`)
-  if (filters.prices?.length) parts.push(`Price levels: ${filters.prices.map(p => '$'.repeat(p)).join(', ')}`)
-  if (filters.radius) parts.push(`Maximum distance: ${filters.radius < 1000 ? `${filters.radius}m` : `${filters.radius / 1000}km`}`)
-  return parts.join('. ')
-}
-
 const RecommendationsModal = ({ isOpen, onClose }) => {
   const { user, updateProfile } = useAuth()
-  const { userLocation, loading: locationLoading } = useLocation()
-  const { pins } = usePins()
+  const { userLocation } = useLocation()
 
+  const hasAutoTriggeredRef = useRef(false)
   const currentScrollRef = useRef(null)
 
   const recommendationsModal = useUIStore(state => state.recommendationsModal)
   const showMessage = useUIStore(state => state.showMessageModal)
-  const setRecommendationsLoading = useUIStore(state => state.setRecommendationsLoading)
-  const setRecommendationsError = useUIStore(state => state.setRecommendationsError)
-  const setCurrentRecommendations = useUIStore(state => state.setCurrentRecommendations)
   const addToSavedRecommendations = useUIStore(state => state.addToSavedRecommendations)
-  const removeFromSavedRecommendations = useUIStore(state => state.removeFromSavedRecommendations)
-  const clearRecommendations = useUIStore(state => state.clearRecommendations)
-  const setSessionId = useUIStore(state => state.setSessionId)
-  const setCurrentSessionPlaces = useUIStore(state => state.setCurrentSessionPlaces)
-  const incrementInteractionCount = useUIStore(state => state.incrementInteractionCount)
-  const resetSession = useUIStore(state => state.resetSession)
 
-  const [dataValidation, setDataValidation] = useState({
-    locationReady: false,
-    userReady: false,
-    weatherReady: false,
-    allReady: false
-  })
   const [showRefine, setShowRefine] = useState(false)
   const [showSaved, setShowSaved] = useState(false)
   const [activeFilters, setActiveFilters] = useState(null)
 
+  // Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && isOpen && onClose) onClose()
@@ -70,6 +43,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen, onClose])
 
+  // Body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -77,215 +51,39 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen])
 
+  // Auto-trigger on open; abort on close
   useEffect(() => {
-    if (!isOpen) return
-    const validation = validateDataReadiness()
-    setDataValidation(validation)
-    if (
-      validation.allReady &&
-      !recommendationsModal.loading &&
-      recommendationsModal.currentRecommendations.length === 0
-    ) {
-      generateRecommendations()
+    if (!isOpen) {
+      hasAutoTriggeredRef.current = false
+      recommendationService.abort()
+      return
     }
-  }, [isOpen, user, userLocation, locationLoading, recommendationsModal.loading, recommendationsModal.currentRecommendations.length])
+    if (hasAutoTriggeredRef.current) return
+    if (recommendationsModal.currentRecommendations.length > 0) return
+    hasAutoTriggeredRef.current = true
+    recommendationService.generate({ filters: activeFilters })
+  }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const validateDataReadiness = () => {
-    const userReady = !!(user?.id && user?.profile)
-    const locationReady = !!(userLocation?.lat && userLocation?.lng && !locationLoading)
-    const weatherReady = !!(userLocation?.condition && userLocation?.temperature !== undefined)
-    return { userReady, locationReady, weatherReady, allReady: userReady && locationReady }
+  const handleRefresh = () => {
+    recommendationService.refresh({ filters: activeFilters })
   }
 
-  const generateRecommendations = async ({ filtersOverride = null, excluded_places = [] } = {}) => {
-    const filtersToUse = filtersOverride !== null ? filtersOverride : activeFilters
-    const validation = validateDataReadiness()
-
-    if (!validation.allReady) {
-      if (!validation.locationReady && !locationLoading) {
-        try { await useLocationStore.getState().refreshLocation() } catch (_) {}
-      }
-      const retry = validateDataReadiness()
-      if (!retry.allReady) {
-        setRecommendationsError(
-          !retry.userReady
-            ? 'User profile is still loading. Please wait a moment and try again.'
-            : 'Location data is not available. Please ensure location access is enabled.'
-        )
-        return
-      }
-    }
-
-    setRecommendationsLoading(true)
-    setRecommendationsError(null)
-
-    try {
-      const lat = Number(userLocation.lat)
-      const lng = Number(userLocation.lng)
-      if (isNaN(lat) || isNaN(lng)) throw new Error(`Invalid coordinates: lat=${lat}, lng=${lng}`)
-
-      // Step 1: get taste summary
-      const tasteRes = await fetch(API_ENDPOINTS.COMPUTE_TASTE_SUMMARY, {
-        method: 'POST',
-        headers: edgeFunctionHeaders,
-        body: JSON.stringify({ user_id: user.id })
-      })
-
-      let tasteData = { taste_summary: '', identity_narrative: '', vibe_narrative: '', is_cold_start: true }
-      if (tasteRes.ok) {
-        const tasteJson = await tasteRes.json()
-        if (tasteJson.success) tasteData = tasteJson.data
-      }
-
-      // Step 2: get recommendations
-      const requestData = {
-        current_location: {
-          lat,
-          lng,
-          address: userLocation.address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-          neighborhood: userLocation.locality || userLocation.displayLocation || 'Unknown area'
-        },
-        user_id: user.id,
-        weather_data: {
-          condition: userLocation.condition || 'Clear',
-          temperature: userLocation.temperature ?? 20,
-          is_real: !!(userLocation.condition && userLocation.temperature !== undefined)
-        },
-        taste_summary:      tasteData.taste_summary,
-        identity_narrative: tasteData.identity_narrative,
-        vibe_narrative:     tasteData.vibe_narrative,
-        is_cold_start:      tasteData.is_cold_start,
-        excluded_places:    Array.isArray(excluded_places) ? excluded_places : [],
-        ...(filtersToUse && { refinement_context: buildRefinementContext(filtersToUse) })
-      }
-
-      const response = await fetch(API_ENDPOINTS.RECOMMENDATIONS, {
-        method: 'POST',
-        headers: edgeFunctionHeaders,
-        body: JSON.stringify(requestData)
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `API error: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success && data.data.recommendations) {
-        const recommendations = data.data.recommendations
-        const sessionId = data.data.session_id
-
-        setCurrentRecommendations(recommendations, null)
-        setSessionId(sessionId)
-        setCurrentSessionPlaces(
-          recommendations.map(r => ({
-            name: r.name,
-            category: r.category,
-            address: r.address,
-            ai_confidence: r.ai_confidence,
-            lat: r.lat ?? null,
-            lng: r.lng ?? null
-          }))
-        )
-
-        // Step 3: persist session to DB (fire-and-forget)
-        fetch(API_ENDPOINTS.RECOMMENDATION_SESSION, {
-          method: 'POST',
-          headers: edgeFunctionHeaders,
-          body: JSON.stringify({
-            user_id: user.id,
-            session_id: sessionId,
-            places: recommendations.map(r => ({
-              name: r.name,
-              category: r.category,
-              address: r.address,
-              ai_confidence: r.ai_confidence,
-              lat: r.lat ?? null,
-              lng: r.lng ?? null
-            }))
-          })
-        }).catch(console.error)
-
-      } else {
-        throw new Error('Invalid API response format')
-      }
-
-    } catch (error) {
-      setRecommendationsError(`Failed to generate recommendations: ${error.message}`)
-    } finally {
-      setRecommendationsLoading(false)
-    }
-  }
-
-  const writeFeedback = (recommendation, actionType) => {
-    incrementInteractionCount()
-    fetch(API_ENDPOINTS.UPDATE_TASTE_PROFILE, {
-      method: 'POST',
-      headers: edgeFunctionHeaders,
-      body: JSON.stringify({
-        user_id: user.id,
-        action: actionType,
-        category: recommendation.category ?? null,
-        session_id: recommendationsModal.sessionId ?? null,
-        place_name: recommendation.name,
-        ai_confidence: recommendation.ai_confidence ?? null,
-        distance_km: recommendation.distance_km ?? null,
-        time_of_day: getCurrentTimeOfDay(),
-        weather_condition: userLocation?.condition ?? null
-      })
-    }).catch(console.error)
-  }
-
-  const handleSaveRecommendation = async (recommendation) => {
-    const alreadySaved = savedRecommendations.find(r => r.name === recommendation.name)
-    if (alreadySaved) return
-    const savedRec = { ...recommendation, saved_at: new Date().toISOString(), original_cache_key: recommendationsModal.cacheKey }
-    const updatedSaved = [...savedRecommendations, savedRec]
-    addToSavedRecommendations(recommendation)
-    await updateProfile({ savedLocations: updatedSaved })
-    showMessage('Saved', `${recommendation.name} added to your saved recommendations`)
-  }
-
-  const handleRemoveSaved = async (recommendationName) => {
-    const updatedSaved = savedRecommendations.filter(r => r.name !== recommendationName)
-    removeFromSavedRecommendations(recommendationName)
-    await updateProfile({ savedLocations: updatedSaved })
-    showMessage('Removed', 'Recommendation removed from saved list')
-  }
-
-  const handleGetDirections = (recommendation) => {
-    writeFeedback(recommendation, 'directions')
-    const address = encodeURIComponent(recommendation.address)
+  const handleGetDirections = (rec) => {
+    recommendationService.writeFeedback(rec, 'directions')
+    const address = encodeURIComponent(rec.address)
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${address}`, '_blank')
   }
 
-  const handleRefresh = () => {
-    const { currentRecommendations, sessionId, interactionCount, currentSessionPlaces } = recommendationsModal
+  const handleSaveRecommendation = async (recommendation) => {
+    const already = recommendationsModal.savedRecommendations.find(r => r.name === recommendation.name)
+    if (already) return
 
-    // Batch dismiss all places that received zero interactions in this session
-    if (sessionId && currentRecommendations.length > 0 && interactionCount === 0) {
-      fetch(API_ENDPOINTS.UPDATE_TASTE_PROFILE, {
-        method: 'POST',
-        headers: edgeFunctionHeaders,
-        body: JSON.stringify({
-          user_id: user.id,
-          action: 'batch_dismissed',
-          session_id: sessionId,
-          time_of_day: getCurrentTimeOfDay(),
-          weather_condition: userLocation?.condition ?? null,
-          items: currentSessionPlaces.map(p => ({ place_name: p.name, category: p.category }))
-        })
-      }).catch(console.error)
-    }
+    addToSavedRecommendations(recommendation)
 
-    // Build exclusion list from the old session's place names
-    const excluded = currentRecommendations.map(r => r.name)
-
-    // Reset session state and fetch fresh recommendations
-    clearRecommendations()
-    resetSession()
-    generateRecommendations({ excluded_places: excluded })
+    // Read fresh state after store update to avoid stale snapshot
+    const fresh = useUIStore.getState().recommendationsModal.savedRecommendations
+    await updateProfile({ savedLocations: fresh })
+    showMessage('Saved', `${recommendation.name} added to your saved recommendations`)
   }
 
   if (!isOpen) return null
@@ -305,7 +103,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
               aria-label="Refresh recommendations"
               disabled={loading}
             >
-              {loading
+              {loading && currentRecommendations.length === 0
                 ? <i className="fas fa-spinner fa-spin text-base"></i>
                 : <i className="fas fa-sync-alt text-base"></i>
               }
@@ -332,9 +130,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
               <button
                 onClick={() => {
                   setActiveFilters(null)
-                  clearRecommendations()
-                  resetSession()
-                  generateRecommendations()
+                  recommendationService.generate({ filters: null })
                 }}
                 className="text-customPurpleText font-medium transition-colors"
               >
@@ -343,32 +139,8 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Data readiness indicator */}
-          {!dataValidation.allReady && !error && (
-            <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center space-x-2 mb-2">
-                <LoadingSpinner size="sm" />
-                <span className="text-sm font-medium text-blue-800">Preparing recommendations...</span>
-              </div>
-              <div className="text-xs text-blue-600 space-y-1">
-                <div className="flex items-center space-x-2">
-                  <i className={`fas ${dataValidation.userReady ? 'fa-check text-green-500' : 'fa-clock text-blue-500'}`}></i>
-                  <span>User profile</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <i className={`fas ${dataValidation.locationReady ? 'fa-check text-green-500' : 'fa-clock text-blue-500'}`}></i>
-                  <span>Location data</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <i className={`fas ${dataValidation.weatherReady ? 'fa-check text-green-500' : 'fa-clock text-orange-500'}`}></i>
-                  <span>Weather data (optional)</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Loading */}
-          {loading && (
+          {/* Initial loading — no cards yet */}
+          {loading && currentRecommendations.length === 0 && (
             <div className="text-center py-8">
               <p className="text-customPurpleText font-medium">Hang Tight...</p>
             </div>
@@ -382,7 +154,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
               </div>
               <p className="text-red-600 text-sm mb-4">{error}</p>
               <button
-                onClick={() => { clearRecommendations(); resetSession(); generateRecommendations() }}
+                onClick={() => recommendationService.generate({ filters: activeFilters })}
                 className="bg-customPurple text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:opacity-90"
               >
                 Try Again
@@ -390,15 +162,15 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Empty state */}
-          {!loading && !error && currentRecommendations.length === 0 && dataValidation.allReady && (
+          {/* Empty state — not loading, no error, no cards */}
+          {!loading && !error && currentRecommendations.length === 0 && (
             <div className="text-center py-8">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className="fas fa-compass text-gray-400"></i>
               </div>
               <p className="text-gray-500 text-sm mb-4">No recommendations yet</p>
               <button
-                onClick={() => generateRecommendations()}
+                onClick={() => recommendationService.generate({ filters: activeFilters })}
                 className="bg-customPurple text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:opacity-90"
               >
                 Generate Recommendations
@@ -406,7 +178,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Current Recommendations */}
+          {/* Cards — visible as soon as first batch arrives, even while still streaming */}
           {currentRecommendations.length > 0 && (
             <div className="mb-6">
               {activeFilters?.types?.length > 0 && (() => {
@@ -426,19 +198,26 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
 
               <div className="overflow-y-auto scroll-smooth">
                 <div className="flex flex-col gap-4" ref={currentScrollRef}>
-                  {currentRecommendations.map((rec, index) => (
+                  {currentRecommendations.map((rec) => (
                     <RecommendationCard
-                      key={index}
+                      key={rec.name}
                       recommendation={rec}
                       onSave={() => handleSaveRecommendation(rec)}
                       onDirections={() => handleGetDirections(rec)}
-                      onLike={() => writeFeedback(rec, 'like')}
-                      onDismiss={() => writeFeedback(rec, 'dismiss')}
+                      onLike={() => recommendationService.writeFeedback(rec, 'like')}
+                      onDismiss={() => recommendationService.writeFeedback(rec, 'dismiss')}
                       isSaved={savedRecommendations.some(saved => saved.name === rec.name)}
                     />
                   ))}
                 </div>
               </div>
+
+              {/* Streaming indicator — shown while more cards are still arriving */}
+              {loading && (
+                <div className="flex justify-center mt-4">
+                  <i className="fas fa-spinner fa-spin text-customPurpleText text-sm"></i>
+                </div>
+              )}
             </div>
           )}
 
@@ -472,9 +251,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
           onApply={(filters) => {
             setActiveFilters(filters)
             setShowRefine(false)
-            clearRecommendations()
-            resetSession()
-            generateRecommendations({ filtersOverride: filters })
+            recommendationService.generate({ filters })
           }}
         />
       )}

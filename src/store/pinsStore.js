@@ -25,6 +25,7 @@ const uploadFileToBucket = async (file, bucket, path) => {
 
 const mapPin = (pin) => ({
   ...pin,
+  userId: pin.user_id,
   culturalContext: pin.cultural_context,
   audioUrl: pin.audio_url,
   timestamp: pin.timestamp ? new Date(pin.timestamp) : new Date()
