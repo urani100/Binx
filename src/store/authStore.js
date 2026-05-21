@@ -153,6 +153,21 @@ export const useAuthStore = create(
         }
       }, 'Authentication'),
 
+      loginWithGoogle: withErrorHandling(async () => {
+        set({ loading: true, error: null })
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin }
+          })
+          if (error) throw error
+        } catch (error) {
+          const errorMessage = handleSupabaseError(error)
+          set({ error: errorMessage, loading: false })
+          return { success: false, error: errorMessage }
+        }
+      }, 'Google Login'),
+
       register: withErrorHandling(async (email, password, name) => {
         set({ loading: true, error: null })
 

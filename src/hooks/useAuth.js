@@ -24,6 +24,7 @@
    // Store actions
    const initialize = useAuthStore(state => state.initialize)
    const login = useAuthStore(state => state.login)
+   const loginWithGoogle = useAuthStore(state => state.loginWithGoogle)
    const register = useAuthStore(state => state.register)
    const logout = useAuthStore(state => state.logout)
    const updateProfile = useAuthStore(state => state.updateProfile)
@@ -184,6 +185,7 @@
      // Actions
      initialize,
      login: loginWithValidation,
+     loginWithGoogle,
      register: registerWithValidation,
      logout: logoutWithCleanup,
      updateProfile: updateProfileWithValidation,
