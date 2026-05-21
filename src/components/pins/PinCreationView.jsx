@@ -295,20 +295,20 @@
          {/* Modal Header */}
          <div className="flex justify-between items-center mb-4">
            <button
-             onClick={onClose}
-             className="text-customPurpleText transition-colors"
-             aria-label="Close modal"
-           >
-             ✕
-           </button>
-           <h3 className="text-xl font-semibold text-customPurpleText pl-6">Vibe</h3>
-           <button
              onClick={handleSubmit}
              className="text-customPurpleText font-medium disabled:opacity-50 transition-colors"
              disabled={isSaveDisabled}
              aria-label="Save pin"
            >
              Save
+           </button>
+           <h3 className="text-xl font-semibold text-customPurpleText">Vibe</h3>
+           <button
+             onClick={onClose}
+             className="text-customPurpleText transition-colors"
+             aria-label="Close modal"
+           >
+             ✕
            </button>
          </div>
  

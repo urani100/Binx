@@ -81,7 +81,7 @@
                id="delete-modal-title"
                className="font-medium text-gray-900"
              >
-               Delete Pin?
+               Delete?
              </h3>
              <p 
                id="delete-modal-description"
