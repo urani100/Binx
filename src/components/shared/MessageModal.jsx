@@ -62,7 +62,7 @@
      info: {
        icon: 'fas fa-info-circle',
        iconColor: 'text-customPurple',
-       bgColor: 'bg-gray-100'
+       bgColor: 'bg-customBackground'
      },
      success: {
        icon: 'fas fa-check-circle',

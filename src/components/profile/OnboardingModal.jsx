@@ -91,7 +91,7 @@
          ...profileData,
          onboardingCompleted: true
        })
-       showMessage('Basic profile complete!')
+       showMessage('Profile saved')
        onClose()
      } catch (error) {
        console.error('Profile update failed:', error)
