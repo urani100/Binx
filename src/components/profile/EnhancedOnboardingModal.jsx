@@ -9,11 +9,13 @@
  import React, { useState, useEffect } from 'react'
  import PropTypes from 'prop-types'
  import { useAuth } from '../../hooks/useAuth'
+ import { useUIStore } from '../../store/uiStore'
  import { API_ENDPOINTS } from '../../utils/constants'
  import { edgeFunctionHeaders } from '../../services/supabase'
  
  const EnhancedOnboardingModal = ({ isOpen, onClose, onComplete }) => {
-     const { updateProfile, user } = useAuth() 
+     const { updateProfile, user } = useAuth()
+     const showMessage = useUIStore(state => state.showMessageModal)
      const [loading, setLoading] = useState(false)
      const [step, setStep] = useState(0)
      const totalSteps = 6
@@ -140,6 +142,7 @@
                  body: JSON.stringify({ user_id: user.id, preferences })
              }).catch(console.error)
 
+             showMessage('Profile saved')
              onComplete?.()
              onClose()
          } catch (error) {
