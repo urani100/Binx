@@ -232,7 +232,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                 onClick={() => setShowSaved(true)}
                 className="flex-1 py-3 px-6 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90"
               >
-                Saved Locations
+                Saved Recommendations
               </button>
             </div>
           )}

@@ -365,7 +365,7 @@
                onClick={() => setShowSavedLocations(true)}
                className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
              >
-               Saved Locations
+               Saved Recommendations
              </button>
            </div>
          </div>
