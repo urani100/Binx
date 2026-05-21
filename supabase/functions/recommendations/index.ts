@@ -162,21 +162,26 @@ Deno.serve(async (req) => {
       const extractor = new RecommendationExtractor()
 
       try {
-        const stream = anthropic.messages.stream({
+        const response = await anthropic.messages.create({
           model: 'claude-sonnet-4-6',
           max_tokens: 2048,
+          stream: true,
           system: [{ type: 'text', text: BINX_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
           tools: [{ ...buildRecommendationsTool(hasRefinement), cache_control: { type: 'ephemeral' } }],
           tool_choice: { type: 'tool', name: 'generate_recommendations' },
           messages: [{ role: 'user', content: prompt }],
         })
 
-        for await (const event of stream) {
+        let fullInputJson = ''
+
+        for await (const event of response) {
           if (
             event.type === 'content_block_delta' &&
             event.delta.type === 'input_json_delta'
           ) {
-            const recs = extractor.feed(event.delta.partial_json)
+            const chunk = event.delta.partial_json
+            fullInputJson += chunk
+            const recs = extractor.feed(chunk)
             for (const rec of recs) {
               const enriched = { ...rec, lat: (rec.lat as number) ?? null, lng: (rec.lng as number) ?? null }
               controller.enqueue(
@@ -186,11 +191,11 @@ Deno.serve(async (req) => {
           }
         }
 
-        const finalMsg = await stream.finalMessage()
-        const toolBlock = finalMsg.content.find(b => b.type === 'tool_use')
-        const reasoning = toolBlock?.type === 'tool_use'
-          ? ((toolBlock.input as { reasoning?: string }).reasoning ?? '')
-          : ''
+        let reasoning = ''
+        try {
+          const parsed = JSON.parse(fullInputJson)
+          reasoning = typeof parsed.reasoning === 'string' ? parsed.reasoning : ''
+        } catch { /* reasoning is optional */ }
 
         controller.enqueue(
           encoder.encode(JSON.stringify({ type: 'done', session_id, reasoning }) + '\n')
