@@ -97,8 +97,10 @@
                {userLocation ? (
                  <>
                    <span>{userLocation.lat.toFixed(2)}, {userLocation.lng.toFixed(2)}</span>
-                   <span>•</span>
-                   <span>{userLocation.sublocality || userLocation.locality || userLocation.displayLocation || 'Location unknown'}</span>
+                   {(userLocation.sublocality || userLocation.locality || userLocation.displayLocation) && (
+                     <><span>•</span>
+                     <span>{userLocation.sublocality || userLocation.locality || userLocation.displayLocation}</span></>
+                   )}
                    <span>•</span>
                    <span>{userLocation.temperature}°C</span>
                    {userLocation.weatherIcon && (
