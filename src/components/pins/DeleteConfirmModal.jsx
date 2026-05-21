@@ -70,7 +70,7 @@
        <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg text-left">
          {/* Header */}
          <div className="flex items-center space-x-3 mb-4">
-           <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+           <div className="w-12 h-12 bg-customBackground rounded-full flex items-center justify-center">
              <i 
                className="fas fa-exclamation-triangle text-customPurple text-xl" 
                aria-hidden="true"
