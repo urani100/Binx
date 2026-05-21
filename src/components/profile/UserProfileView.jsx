@@ -195,7 +195,7 @@
              )}
            </div>
  
-           <h2 className="font-medium text-gray-900 mb-2">Hello, {user?.name || 'Friend'}!</h2>
+           <h2 className="font-medium text-gray-400 mb-2">Hello, {user?.name || 'Friend'}!</h2>
            <p className="text-sm text-gray-500">{user?.email}</p>
          </div>
  
