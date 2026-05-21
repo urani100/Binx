@@ -116,7 +116,7 @@ export async function generate({ filters = null, excludedPlaces = [] } = {}) {
       vibe_narrative:     tasteData.vibe_narrative,
       is_cold_start:      tasteData.is_cold_start,
       avoided_categories: tasteData.avoided_categories ?? [],
-      excluded_places:    Array.isArray(excludedPlaces) ? excludedPlaces : [],
+      excluded_places:    [...(Array.isArray(excludedPlaces) ? excludedPlaces : []), ...(store.recommendationsModal.dismissedPlaces ?? [])],
       ...(filters && { refinement_context: buildRefinementContext(filters) })
     }
 

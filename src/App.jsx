@@ -55,6 +55,7 @@
    const hideOnboardingModal = useUIStore(state => state.hideOnboardingModal)
    const hideRecommendationsModal = useUIStore(state => state.hideRecommendationsModal)
    const seedSavedLocations = useUIStore(state => state.seedSavedLocations)
+   const seedDismissedPlaces = useUIStore(state => state.seedDismissedPlaces)
 
    // Initialize stores on app start
    useEffect(() => {
@@ -84,10 +85,13 @@
      }
    }, [isAuthenticated, selectedGuideName])
 
-   // Seed saved locations from profile into UI store after profile loads
+   // Seed saved locations and dismissed places from profile into UI store after profile loads
    useEffect(() => {
      if (profileLoaded && user?.profile?.savedLocations) {
        seedSavedLocations(user.profile.savedLocations)
+     }
+     if (profileLoaded && user?.profile?.dismissedPlaces) {
+       seedDismissedPlaces(user.profile.dismissedPlaces)
      }
    }, [profileLoaded])
  

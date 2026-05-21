@@ -28,6 +28,7 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
   const showMessage = useUIStore(state => state.showMessageModal)
   const addToSavedRecommendations = useUIStore(state => state.addToSavedRecommendations)
   const removeFromCurrentRecommendations = useUIStore(state => state.removeFromCurrentRecommendations)
+  const addToDismissedPlaces = useUIStore(state => state.addToDismissedPlaces)
 
   const [showRefine, setShowRefine] = useState(false)
   const [showSaved, setShowSaved] = useState(false)
@@ -209,6 +210,9 @@ const RecommendationsModal = ({ isOpen, onClose }) => {
                       onDismiss={() => {
                         recommendationService.writeFeedback(rec, 'dismiss')
                         removeFromCurrentRecommendations(rec.name)
+                        addToDismissedPlaces(rec.name)
+                        const fresh = useUIStore.getState().recommendationsModal.dismissedPlaces
+                        updateProfile({ dismissedPlaces: fresh }).catch(console.error)
                       }}
                       isSaved={savedRecommendations.some(saved => saved.name === rec.name)}
                     />

@@ -118,7 +118,8 @@ export const useAuthStore = create(
                   aestheticPreferences:        saved.aestheticPreferences ?? [],
                   avoidancePreferences:        saved.avoidancePreferences ?? [],
                   enhancedOnboardingCompleted: saved.enhancedOnboardingCompleted ?? false,
-                  savedLocations:              saved.savedLocations ?? []
+                  savedLocations:              saved.savedLocations ?? [],
+                  dismissedPlaces:             saved.dismissedPlaces ?? []
                 }
               },
               profileLoaded: true

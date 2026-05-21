@@ -53,6 +53,7 @@ export const useUIStore = create(
         sessionId: null,
         currentSessionPlaces: [],
         interactionCount: 0,
+        dismissedPlaces: [],
       },
       locationsModal: {
         isOpen: false
@@ -316,6 +317,26 @@ export const useUIStore = create(
         })
       },
 
+      seedDismissedPlaces: (places) => {
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            dismissedPlaces: Array.isArray(places) ? places : []
+          }
+        })
+      },
+
+      addToDismissedPlaces: (name) => {
+        const { dismissedPlaces } = get().recommendationsModal
+        if (dismissedPlaces.includes(name)) return
+        set({
+          recommendationsModal: {
+            ...get().recommendationsModal,
+            dismissedPlaces: [...dismissedPlaces, name]
+          }
+        })
+      },
+
       clearRecommendations: () => {
         set({
           recommendationsModal: {
@@ -435,6 +456,7 @@ export const useUIStore = create(
             sessionId: null,
             currentSessionPlaces: [],
             interactionCount: 0,
+            dismissedPlaces: [],
           },
           selectedPin: null,
           showPinCreation: false,
@@ -464,6 +486,7 @@ export const useUIStore = create(
             sessionId: null,
             currentSessionPlaces: [],
             interactionCount: 0,
+            dismissedPlaces: [],
           },
           showPinCreation: false,
           showUserProfile: false
