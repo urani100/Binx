@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useUIStore } from '../../store/uiStore'
 import RecommendationCard from './RecommendationCard'
 import DeleteConfirmModal from '../pins/DeleteConfirmModal'
+import { writeFeedback } from '../../services/recommendationService'
 
 const SavedLocationsModal = ({ isOpen, onClose }) => {
     const { updateProfile } = useAuth()
@@ -31,8 +32,9 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
         }
     }, [isOpen])
 
-    const handleRemove = async (recommendationName) => {
-        removeFromSavedRecommendations(recommendationName)
+    const handleRemove = async (rec) => {
+        writeFeedback(rec, 'dismiss')
+        removeFromSavedRecommendations(rec.name)
         const fresh = useUIStore.getState().recommendationsModal.savedRecommendations
         await updateProfile({ savedLocations: fresh })
         showMessage('Removed', 'Recommendation removed from saved list')
@@ -99,7 +101,7 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
                 location: { name: pendingRemoval.address },
                 note: pendingRemoval.vibe_match_reason
             } : null}
-            onConfirm={() => { handleRemove(pendingRemoval.name); setPendingRemoval(null) }}
+            onConfirm={() => { handleRemove(pendingRemoval); setPendingRemoval(null) }}
             onCancel={() => setPendingRemoval(null)}
         />
         </>
