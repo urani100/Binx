@@ -152,8 +152,8 @@
      // Get step titles
      const getStepTitle = () => {
          const titles = [
+             'Activity Preferences',
              'Cuisine Preferences',
-             'Activity Preferences', 
              'Budget Preferences',
              'Discovery Style',
              'Social Style',
@@ -235,8 +235,8 @@
                  <div className="space-y-4">
                      <h3 className="text-xl font-semibold text-gray-800">{getStepTitle()}</h3>
                      
-                     {step === 0 && renderCheckboxGroup(cuisineOptions, 'cuisinePreferences')}
-                     {step === 1 && renderCheckboxGroup(activityOptions, 'activityTypes')}
+                     {step === 0 && renderCheckboxGroup(activityOptions, 'activityTypes')}
+                     {step === 1 && renderCheckboxGroup(cuisineOptions, 'cuisinePreferences')}
                      {step === 2 && renderRadioGroup(priceOptions, 'priceComfort')}
                      {step === 3 && renderRadioGroup(discoveryOptions, 'discoveryStyle')}
                      {step === 4 && renderRadioGroup(socialOptions, 'socialPreference')}
