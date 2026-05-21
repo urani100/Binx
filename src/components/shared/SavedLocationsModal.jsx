@@ -52,6 +52,7 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
+                    <div className="w-5" />
                     <h3 className="text-xl font-semibold text-customPurpleText">Saved Recommendations</h3>
                     <button
                         onClick={onClose}
