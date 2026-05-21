@@ -158,6 +158,7 @@ export async function generate({ filters = null, excludedPlaces = [] } = {}) {
 
         if (event.type === 'recommendation') {
           const rec = event.data
+          console.log(`[rec] ${rec.name} @ ${Date.now()}ms`)
           allPlaces.push({
             name:          rec.name,
             category:      rec.category,
