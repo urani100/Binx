@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useAuth } from '../../hooks/useAuth'
 import { useUIStore } from '../../store/uiStore'
 import RecommendationCard from './RecommendationCard'
+import DeleteConfirmModal from '../pins/DeleteConfirmModal'
 
 const SavedLocationsModal = ({ isOpen, onClose }) => {
     const { updateProfile } = useAuth()
@@ -11,6 +12,7 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
     const showMessage = useUIStore(state => state.showMessageModal)
 
     const { savedRecommendations } = recommendationsModal
+    const [pendingRemoval, setPendingRemoval] = useState(null)
 
     useEffect(() => {
         const handleEscape = (e) => {
@@ -44,6 +46,7 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null
 
     return (
+        <>
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left max-h-[90vh] overflow-y-auto">
 
@@ -77,7 +80,7 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
                             <RecommendationCard
                                 key={rec.name}
                                 recommendation={rec}
-                                onRemove={() => handleRemove(rec.name)}
+                                onRemove={() => setPendingRemoval(rec)}
                                 onDirections={() => handleDirections(rec)}
                                 isSaved={true}
                                 showSavedDate={true}
@@ -87,6 +90,18 @@ const SavedLocationsModal = ({ isOpen, onClose }) => {
                 )}
             </div>
         </div>
+
+        <DeleteConfirmModal
+            isOpen={!!pendingRemoval}
+            pin={pendingRemoval ? {
+                title: pendingRemoval.name,
+                location: { name: pendingRemoval.address },
+                note: pendingRemoval.vibe_match_reason
+            } : null}
+            onConfirm={() => { handleRemove(pendingRemoval.name); setPendingRemoval(null) }}
+            onCancel={() => setPendingRemoval(null)}
+        />
+        </>
     )
 }
 
