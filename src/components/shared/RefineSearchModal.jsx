@@ -5,7 +5,7 @@ const RefineSearchModal = ({ onClose, onApply, initial = {}, categoryOptions, pr
   const [step, setStep] = useState(1)
   const [types, setTypes] = useState(initial.types || [])
   const [prices, setPrices] = useState(initial.prices || [])
-  const [radius, setRadius] = useState(initial.radius || 1000)
+  const [radius, setRadius] = useState(initial.radius ?? null)
 
   const toggle = (arr, val) => arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]
 
@@ -79,6 +79,17 @@ const RefineSearchModal = ({ onClose, onApply, initial = {}, categoryOptions, pr
 
         {step === 3 && (
           <div className="grid grid-cols-1 gap-3">
+            <label className="flex items-center gap-2 text-sm text-gray-800">
+              <input
+                type="radio"
+                name="radius"
+                checked={radius === null}
+                onChange={() => setRadius(null)}
+                className="border-gray-300"
+                style={{ accentColor: '#bdbdbd' }}
+              />
+              Any
+            </label>
             {[500, 1000, 2000, 5000].map(r => (
               <label key={r} className="flex items-center gap-2 text-sm text-gray-800">
                 <input

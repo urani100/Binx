@@ -75,22 +75,33 @@ const RecommendationCard = ({ recommendation, onSave, onRemove, onDirections, on
                 </p>
             )}
 
-            <div className="flex space-x-3">
-                {!isSaved && onSave && (
+            {isSaved ? (
+                <div className="flex justify-center">
                     <button
-                        onClick={onSave}
-                        className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+                        onClick={onDirections}
+                        className="py-3 px-6 bg-customPurpleText text-white rounded-xl font-medium transition-colors hover:opacity-90"
                     >
-                        Save
+                        Directions
                     </button>
-                )}
-                <button
-                    onClick={onDirections}
-                    className="flex-1 py-3 px-4 bg-customPurpleText text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
-                >
-                    Directions
-                </button>
-            </div>
+                </div>
+            ) : (
+                <div className="flex space-x-3">
+                    {onSave && (
+                        <button
+                            onClick={onSave}
+                            className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+                        >
+                            Save
+                        </button>
+                    )}
+                    <button
+                        onClick={onDirections}
+                        className="flex-1 py-3 px-4 bg-customPurpleText text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+                    >
+                        Directions
+                    </button>
+                </div>
+            )}
         </div>
     )
 }
