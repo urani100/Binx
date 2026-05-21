@@ -6,7 +6,7 @@ import { API_ENDPOINTS } from '../utils/constants'
 import { getCurrentTimeOfDay } from '../utils/helpers'
 
 const RATE_LIMIT_MS = 5000
-const INITIAL_BUFFER_SIZE = 3
+const INITIAL_BUFFER_SIZE = 1
 const REQUEST_TIMEOUT_MS = 32000
 
 let activeController = null
@@ -66,10 +66,7 @@ async function fetchTasteSummary(userId, signal) {
 }
 
 export async function generate({ filters = null, excludedPlaces = [] } = {}) {
-  // Rate limit check first — no store mutations if blocked
-  const now = Date.now()
-  if (now - lastGenerateTime < RATE_LIMIT_MS) return
-  lastGenerateTime = now
+  lastGenerateTime = Date.now()
 
   // Abort any in-flight request
   if (activeController) activeController.abort()
@@ -221,6 +218,9 @@ export async function generate({ filters = null, excludedPlaces = [] } = {}) {
 }
 
 export async function refresh({ filters = null } = {}) {
+  const now = Date.now()
+  if (now - lastGenerateTime < RATE_LIMIT_MS) return
+
   const { currentRecommendations, sessionId, interactionCount, currentSessionPlaces } =
     useUIStore.getState().recommendationsModal
 
