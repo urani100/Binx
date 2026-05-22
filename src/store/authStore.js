@@ -30,6 +30,8 @@ export const useAuthStore = create(
           // state settles, but auth state can't settle until the callback
           // finishes, which is waiting for the REST call.
           if (session?.user) {
+            // Skip normal login during password recovery — AuthView handles it
+            if (get().isPasswordRecovery) return
             const supabaseUser = session.user
             const existingUser = get().user
             // Reuse already-loaded profile on token refresh (same user)
