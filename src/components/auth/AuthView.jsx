@@ -100,7 +100,11 @@ const AuthView = () => {
     }
     setValidationErrors({})
     const result = await resetPassword(authForm.email)
-    if (result?.success) setResetEmailSent(true)
+    if (result?.success) {
+      setResetEmailSent(true)
+    } else if (result?.error) {
+      setValidationErrors({ email: result.error.includes('rate limit') ? 'Too many requests — please wait a few minutes and try again.' : result.error })
+    }
   }
 
   const handleUpdatePassword = async (e) => {
