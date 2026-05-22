@@ -130,6 +130,17 @@
  export const validatePassword = (password) => {
    return password && password.length >= 6
  }
+
+ export const getPasswordRequirements = (password) => ({
+   length:    (password?.length ?? 0) >= 8,
+   uppercase: /[A-Z]/.test(password || ''),
+   lowercase: /[a-z]/.test(password || ''),
+   number:    /[0-9]/.test(password || ''),
+   special:   /[^A-Za-z0-9]/.test(password || '')
+ })
+
+ export const validateStrongPassword = (password) =>
+   Object.values(getPasswordRequirements(password)).every(Boolean)
  
  /**
   * Required field validation

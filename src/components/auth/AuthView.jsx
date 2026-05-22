@@ -9,6 +9,29 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { useAuth } from '../../hooks/useAuth'
 import { LoadingSpinner } from '../ui'
+import { getPasswordRequirements, validateStrongPassword } from '../../utils/helpers'
+
+const REQUIREMENT_LABELS = [
+  { key: 'length',    label: '8+ characters' },
+  { key: 'uppercase', label: 'One uppercase letter' },
+  { key: 'lowercase', label: 'One lowercase letter' },
+  { key: 'number',    label: 'One number' },
+  { key: 'special',   label: 'One special character (!@#$...)' }
+]
+
+const PasswordChecklist = ({ password }) => {
+  const req = getPasswordRequirements(password)
+  return (
+    <div className="mt-2 space-y-1">
+      {REQUIREMENT_LABELS.map(({ key, label }) => (
+        <div key={key} className={`text-xs flex items-center gap-1 ${req[key] ? 'text-green-600' : 'text-gray-400'}`}>
+          <span>{req[key] ? '✓' : '○'}</span>
+          <span>{label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const AuthView = () => {
   const { login, loginWithGoogle, register, resetPassword, updatePassword, loading, isPasswordRecovery } = useAuth()
@@ -37,7 +60,11 @@ const AuthView = () => {
       errors.email = 'Please enter a valid email address'
     }
 
-    if (!authForm.password || authForm.password.length < 6) {
+    if (authMode === 'register') {
+      if (!validateStrongPassword(authForm.password)) {
+        errors.password = 'Password must meet all requirements below'
+      }
+    } else if (!authForm.password || authForm.password.length < 6) {
       errors.password = 'Password must be at least 6 characters'
     }
 
@@ -78,8 +105,8 @@ const AuthView = () => {
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault()
-    if (newPassword.length < 6) {
-      setValidationErrors({ newPassword: 'Password must be at least 6 characters' })
+    if (!validateStrongPassword(newPassword)) {
+      setValidationErrors({ newPassword: 'Password must meet all requirements below' })
       return
     }
     if (newPassword !== confirmPassword) {
@@ -134,6 +161,7 @@ const AuthView = () => {
                 {validationErrors.newPassword && (
                   <p className="text-red-500 text-xs mt-1">{validationErrors.newPassword}</p>
                 )}
+                {newPassword.length > 0 && <PasswordChecklist password={newPassword} />}
               </div>
               <div>
                 <input
@@ -296,6 +324,9 @@ const AuthView = () => {
                 />
                 {validationErrors.password && (
                   <p id="password-error" className="text-red-500 text-xs mt-1">{validationErrors.password}</p>
+                )}
+                {authMode === 'register' && authForm.password.length > 0 && (
+                  <PasswordChecklist password={authForm.password} />
                 )}
               </div>
 
