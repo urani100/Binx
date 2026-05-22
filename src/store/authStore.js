@@ -25,6 +25,11 @@ export const useAuthStore = create(
             return
           }
 
+          if (event === 'USER_UPDATED') {
+            set({ isPasswordRecovery: false })
+            // fall through to normal session handling below to log user in
+          }
+
           // Synchronous — never await REST calls inside this listener.
           // Doing so causes a deadlock: the SDK queues REST calls until auth
           // state settles, but auth state can't settle until the callback
@@ -218,7 +223,7 @@ export const useAuthStore = create(
         try {
           const { error } = await supabase.auth.updateUser({ password: newPassword })
           if (error) throw error
-          set({ loading: false, isPasswordRecovery: false })
+          set({ loading: false })
           return { success: true }
         } catch (error) {
           const errorMessage = handleSupabaseError(error)

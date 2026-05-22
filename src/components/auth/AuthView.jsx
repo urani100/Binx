@@ -119,7 +119,9 @@ const AuthView = () => {
     }
     setValidationErrors({})
     const result = await updatePassword(newPassword)
-    if (result?.success) setPasswordUpdateSuccess(true)
+    if (result?.error) {
+      setValidationErrors({ newPassword: result.error })
+    }
   }
 
   const handleInputChange = (field, value) => {
