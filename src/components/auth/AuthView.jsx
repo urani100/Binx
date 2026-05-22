@@ -174,7 +174,7 @@ const AuthView = () => {
                 type="button"
                 onClick={toggleAuthMode}
                 disabled={loading}
-                className="text-sm text-gray-800 underline hover:text-gray-600 transition-colors disabled:opacity-50"
+                className="text-sm text-gray-800 hover:text-gray-600 transition-colors disabled:opacity-50"
               >
                 {authMode === 'login'
                   ? 'Need an account? Sign up'
