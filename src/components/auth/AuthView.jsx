@@ -183,6 +183,7 @@ const AuthView = () => {
               </button>
             </div>
 
+            {/* Google OAuth — disabled, re-enable when custom domain is configured
             <div className="flex items-center my-6">
               <div className="flex-1 h-px bg-gray-200" />
               <span className="px-4 text-xs text-gray-400">or</span>
@@ -203,6 +204,7 @@ const AuthView = () => {
               </svg>
               Continue with Google
             </button>
+            */}
           </>
         )}
       </div>
