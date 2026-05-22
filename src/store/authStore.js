@@ -14,11 +14,17 @@ export const useAuthStore = create(
       error: null,
       isInitialized: false,
       profileLoaded: false,
+      isPasswordRecovery: false,
 
       initialize: () => {
         if (get().isInitialized) return
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            set({ isPasswordRecovery: true })
+            return
+          }
+
           // Synchronous — never await REST calls inside this listener.
           // Doing so causes a deadlock: the SDK queues REST calls until auth
           // state settles, but auth state can't settle until the callback
@@ -188,6 +194,36 @@ export const useAuthStore = create(
           return { success: false, error: errorMessage }
         }
       }, 'Registration'),
+
+      resetPassword: withErrorHandling(async (email) => {
+        set({ loading: true, error: null })
+        try {
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin
+          })
+          if (error) throw error
+          set({ loading: false })
+          return { success: true }
+        } catch (error) {
+          const errorMessage = handleSupabaseError(error)
+          set({ error: errorMessage, loading: false })
+          return { success: false, error: errorMessage }
+        }
+      }, 'Password Reset'),
+
+      updatePassword: withErrorHandling(async (newPassword) => {
+        set({ loading: true, error: null })
+        try {
+          const { error } = await supabase.auth.updateUser({ password: newPassword })
+          if (error) throw error
+          set({ loading: false, isPasswordRecovery: false })
+          return { success: true }
+        } catch (error) {
+          const errorMessage = handleSupabaseError(error)
+          set({ error: errorMessage, loading: false })
+          return { success: false, error: errorMessage }
+        }
+      }, 'Password Update'),
 
       logout: withErrorHandling(async () => {
         const { user } = get()

@@ -20,12 +20,15 @@
    const error = useAuthStore(state => state.error)
    const isInitialized = useAuthStore(state => state.isInitialized)
    const profileLoaded = useAuthStore(state => state.profileLoaded)
+   const isPasswordRecovery = useAuthStore(state => state.isPasswordRecovery)
  
    // Store actions
    const initialize = useAuthStore(state => state.initialize)
    const login = useAuthStore(state => state.login)
    const loginWithGoogle = useAuthStore(state => state.loginWithGoogle)
    const register = useAuthStore(state => state.register)
+   const resetPassword = useAuthStore(state => state.resetPassword)
+   const updatePassword = useAuthStore(state => state.updatePassword)
    const logout = useAuthStore(state => state.logout)
    const updateProfile = useAuthStore(state => state.updateProfile)
    const updateProfilePicture = useAuthStore(state => state.updateProfilePicture)
@@ -181,12 +184,15 @@
      isDemo,
      hasCompletedOnboarding,
      profileLoaded,
+     isPasswordRecovery,
  
      // Actions
      initialize,
      login: loginWithValidation,
      loginWithGoogle,
      register: registerWithValidation,
+     resetPassword,
+     updatePassword,
      logout: logoutWithCleanup,
      updateProfile: updateProfileWithValidation,
      updateProfilePicture: updateProfilePictureWithValidation,

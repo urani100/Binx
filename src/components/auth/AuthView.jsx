@@ -11,7 +11,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { LoadingSpinner } from '../ui'
 
 const AuthView = () => {
-  const { login, loginWithGoogle, register, loading } = useAuth()
+  const { login, loginWithGoogle, register, resetPassword, updatePassword, loading, isPasswordRecovery } = useAuth()
   const [authMode, setAuthMode] = useState('login')
   const [authForm, setAuthForm] = useState({
     email: '',
@@ -21,6 +21,10 @@ const AuthView = () => {
   const [validationErrors, setValidationErrors] = useState({})
   const [registrationSuccess, setRegistrationSuccess] = useState(false)
   const [registeredEmail, setRegisteredEmail] = useState('')
+  const [resetEmailSent, setResetEmailSent] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordUpdateSuccess, setPasswordUpdateSuccess] = useState(false)
 
   const validateForm = () => {
     const errors = {}
@@ -61,6 +65,32 @@ const AuthView = () => {
     } catch (_) {}
   }
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault()
+    if (!authForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authForm.email)) {
+      setValidationErrors({ email: 'Please enter a valid email address' })
+      return
+    }
+    setValidationErrors({})
+    const result = await resetPassword(authForm.email)
+    if (result?.success) setResetEmailSent(true)
+  }
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault()
+    if (newPassword.length < 6) {
+      setValidationErrors({ newPassword: 'Password must be at least 6 characters' })
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setValidationErrors({ confirmPassword: 'Passwords do not match' })
+      return
+    }
+    setValidationErrors({})
+    const result = await updatePassword(newPassword)
+    if (result?.success) setPasswordUpdateSuccess(true)
+  }
+
   const handleInputChange = (field, value) => {
     setAuthForm(prev => ({ ...prev, [field]: value }))
     if (validationErrors[field]) {
@@ -72,6 +102,64 @@ const AuthView = () => {
     setAuthMode(prev => prev === 'login' ? 'register' : 'login')
     setValidationErrors({})
     setAuthForm({ email: '', password: '', name: '' })
+  }
+
+  // Set new password screen — shown after user clicks the reset email link
+  if (isPasswordRecovery) {
+    return (
+      <div className="max-w-sm mx-auto bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="w-full p-6">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-light text-gray-900 mb-2">BiNx</h1>
+            <p className="text-sm text-gray-600">Drop a vibe, not just a pin</p>
+          </div>
+
+          {passwordUpdateSuccess ? (
+            <div className="text-center space-y-4">
+              <p className="text-gray-700 font-medium">Password updated</p>
+              <p className="text-sm text-gray-500">You can now sign in with your new password.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <p className="text-sm text-gray-600 mb-2">Enter your new password</p>
+              <div>
+                <input
+                  type="password"
+                  placeholder="New password"
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); setValidationErrors({}) }}
+                  className={`w-full p-3 border rounded-xl outline-none transition-colors ${validationErrors.newPassword ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
+                  disabled={loading}
+                />
+                {validationErrors.newPassword && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.newPassword}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setValidationErrors({}) }}
+                  className={`w-full p-3 border rounded-xl outline-none transition-colors ${validationErrors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
+                  disabled={loading}
+                />
+                {validationErrors.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-customPurple text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+              >
+                {loading ? <LoadingSpinner size="sm" color="white" /> : 'Set New Password'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -103,6 +191,61 @@ const AuthView = () => {
               Back to Sign In
             </button>
           </div>
+        ) : authMode === 'forgotPassword' ? (
+          resetEmailSent ? (
+            <div className="text-center space-y-4">
+              <p className="text-gray-700 font-medium">Check your email</p>
+              <p className="text-sm text-gray-500">We sent a password reset link to</p>
+              <p className="text-sm font-medium text-gray-900 break-all">{authForm.email}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login')
+                  setResetEmailSent(false)
+                  setAuthForm({ email: '', password: '', name: '' })
+                }}
+                className="w-full bg-customPurple text-white py-3 rounded-xl font-medium transition-colors mt-4"
+              >
+                Back to Sign In
+              </button>
+            </div>
+          ) : (
+            <>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <p className="text-sm text-gray-600 mb-2">Enter your email and we'll send you a reset link.</p>
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={authForm.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className={`w-full p-3 border rounded-xl outline-none transition-colors ${validationErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
+                    disabled={loading}
+                  />
+                  {validationErrors.email && (
+                    <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-customPurple text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {loading ? <LoadingSpinner size="sm" color="white" /> : 'Send Reset Link'}
+                </button>
+              </form>
+              <div className="text-center mt-6">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode('login'); setValidationErrors({}) }}
+                  disabled={loading}
+                  className="text-sm text-gray-800 hover:text-gray-600 transition-colors disabled:opacity-50"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </>
+          )
         ) : (
           <>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -169,18 +312,32 @@ const AuthView = () => {
               </button>
             </form>
 
-            <div className="text-center mt-6">
-              <button
-                type="button"
-                onClick={toggleAuthMode}
-                disabled={loading}
-                className="text-sm text-gray-800 hover:text-gray-600 transition-colors disabled:opacity-50"
-              >
-                {authMode === 'login'
-                  ? 'Need an account? Sign up'
-                  : 'Have an account? Sign in'
-                }
-              </button>
+            <div className="text-center mt-6 space-y-3">
+              <div>
+                <button
+                  type="button"
+                  onClick={toggleAuthMode}
+                  disabled={loading}
+                  className="text-sm text-gray-800 hover:text-gray-600 transition-colors disabled:opacity-50"
+                >
+                  {authMode === 'login'
+                    ? 'Need an account? Sign up'
+                    : 'Have an account? Sign in'
+                  }
+                </button>
+              </div>
+              {authMode === 'login' && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode('forgotPassword'); setValidationErrors({}) }}
+                    disabled={loading}
+                    className="text-sm text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Google OAuth — disabled, re-enable when custom domain is configured
