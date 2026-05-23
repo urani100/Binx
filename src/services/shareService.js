@@ -1,9 +1,12 @@
 import { supabase } from './supabase'
 import { API_ENDPOINTS } from '../utils/constants'
+import { useUIStore } from '../store/uiStore'
 
 export async function createShare(pinId, recipientNote = null) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) throw new Error('Not authenticated')
+
+  const paletteName = useUIStore.getState().selectedPaletteName
 
   const response = await fetch(API_ENDPOINTS.CREATE_SHARE, {
     method: 'POST',
@@ -11,7 +14,7 @@ export async function createShare(pinId, recipientNote = null) {
       'Authorization': `Bearer ${session.access_token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ pin_id: pinId, recipient_note: recipientNote })
+    body: JSON.stringify({ pin_id: pinId, recipient_note: recipientNote, palette: paletteName || null })
   })
 
   if (!response.ok) {

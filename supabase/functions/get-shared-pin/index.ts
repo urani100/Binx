@@ -82,7 +82,8 @@ Deno.serve(async (req) => {
       share: {
         senderFirstName,
         createdAt: share.created_at,
-        expiresAt: share.expires_at
+        expiresAt: share.expires_at,
+        palette: share.palette || null
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

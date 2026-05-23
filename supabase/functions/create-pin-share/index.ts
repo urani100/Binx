@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { pin_id, recipient_note } = await req.json()
+    const { pin_id, recipient_note, palette } = await req.json()
     if (!pin_id) {
       return new Response(JSON.stringify({ error: 'pin_id is required' }), {
         status: 400,
@@ -73,7 +73,8 @@ Deno.serve(async (req) => {
         pin_id,
         user_id: user.id,
         recipient_note: recipient_note || null,
-        expires_at: expiresAt
+        expires_at: expiresAt,
+        palette: palette || null
       })
 
     if (insertError) {

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { VibeTag } from '../ui'
 import CustomAudioPlayer from './CustomAudioPlayer'
-import { formatTimestamp } from '../../utils/helpers'
-import { API_ENDPOINTS } from '../../utils/constants'
+import { formatTimestamp, applyTheme } from '../../utils/helpers'
+import { API_ENDPOINTS, PALETTES } from '../../utils/constants'
 import { edgeFunctionHeaders } from '../../services/supabase'
 
 const VibePage = ({ token }) => {
@@ -21,6 +21,13 @@ const VibePage = ({ token }) => {
       .catch(err => setErrorType(err.expired ? 'expired' : 'notfound'))
       .finally(() => setLoading(false))
   }, [token])
+
+  useEffect(() => {
+    if (data?.share?.palette) {
+      const palette = PALETTES.find(p => p.name === data.share.palette)
+      if (palette) applyTheme(palette)
+    }
+  }, [data])
 
   if (loading) {
     return (
