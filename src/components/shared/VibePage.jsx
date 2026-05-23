@@ -97,7 +97,7 @@ const VibePage = ({ token }) => {
 
         {/* Expiry */}
         <div className="border-t border-gray-100 pt-5 mt-2">
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-sm text-gray-400 text-center">
             This vibe expires on {expiryDate} at {expiryTime}
           </p>
         </div>
