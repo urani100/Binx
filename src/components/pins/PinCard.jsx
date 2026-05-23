@@ -14,10 +14,11 @@
  /**
   * PinCard Component - Exact replica of original pin card styling and behavior
   */
- const PinCard = ({ 
-   pin, 
-   onClick, 
-   onDelete, 
+ const PinCard = ({
+   pin,
+   onClick,
+   onDelete,
+   onShare,
    onOpenPhoto,
    className = ''
  }) => {
@@ -52,8 +53,13 @@
    }
  
 
+  const handleShareClick = (e) => {
+    e.stopPropagation()
+    if (onShare) onShare(pin)
+  }
+
   const handleDeleteClick = (e) => {
-    e.preventDefault()  // Changed from stopPropagation to preventDefault
+    e.preventDefault()
     onDelete(pin)
   }
  
@@ -86,7 +92,13 @@
                ? <VibeTag vibe={pin.mood} size="sm" />
                : null
            }
-             {/* Delete Button - EXACT ORIGINAL STYLING (NO PINK HOVER) */}
+             <button
+               onClick={handleShareClick}
+               className="w-6 h-6 flex items-center justify-center rounded-full bg-customBackground text-customPurpleText transition-colors"
+               title="Share vibe"
+             >
+               <i className="fas fa-share-alt text-xs"></i>
+             </button>
              <button
                onClick={handleDeleteClick}
                className="w-6 h-6 flex items-center justify-center rounded-full bg-customBackground text-customPurpleText transition-colors"
@@ -162,6 +174,7 @@
    pin: PinType.isRequired,
    onClick: PropTypes.func,
    onDelete: PropTypes.func,
+   onShare: PropTypes.func,
    onOpenPhoto: PropTypes.func,
    className: PropTypes.string
  }

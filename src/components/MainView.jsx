@@ -12,6 +12,7 @@
  import { useUIStore } from '../store/uiStore'
  import { UserAvatar, LoadingSpinner } from './ui'
  import { PinCard } from './pins'
+ import { shareVibe } from '../services/shareService'
  import { LocationsModal } from './shared' // Import the new LocationsModal
  import { getGreeting } from '../utils/helpers'
  
@@ -56,7 +57,13 @@
    const handleOpenPhoto = (imageUrl) => {
      showPhotoModal(imageUrl)
    }
- 
+
+   const handleSharePin = async (pin) => {
+     try {
+       await shareVibe(pin)
+     } catch {}
+   }
+
    /**
     * Handle create pin button (V button)
     */
@@ -197,6 +204,7 @@
                  pin={pin}
                  onClick={handleSelectPin}
                  onDelete={handleDeletePin}
+                 onShare={handleSharePin}
                  onOpenPhoto={handleOpenPhoto}
                />
              ))
