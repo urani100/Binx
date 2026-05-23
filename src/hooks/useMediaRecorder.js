@@ -22,6 +22,8 @@ export const useMediaRecorder = () => {
   const [recordingDuration, setRecordingDuration] = useState(0)
   const [isSupported, setIsSupported] = useState(true)
 
+  const MAX_DURATION = 60
+
   // Refs
   const streamRef = useRef(null)
   const chunksRef = useRef([])
@@ -166,7 +168,16 @@ export const useMediaRecorder = () => {
         setRecordingDuration(0)
 
         durationTimerRef.current = setInterval(() => {
-          setRecordingDuration(prev => prev + 1)
+          setRecordingDuration(prev => {
+            const next = prev + 1
+            if (next >= MAX_DURATION) {
+              recorder.stop()
+              streamRef.current?.getTracks().forEach(track => track.stop())
+              clearInterval(durationTimerRef.current)
+              durationTimerRef.current = null
+            }
+            return next
+          })
         }, 1000)
       }
 

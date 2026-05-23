@@ -37,7 +37,7 @@
    // Hooks for external data and functionality
    const { user } = useAuth()
    const { userLocation, updateLocation } = useLocation()
-   const { isRecording, audioUrl, audioBlob, startRecording, stopRecording, clearRecording } = useMediaRecorder()
+   const { isRecording, audioUrl, audioBlob, recordingDuration, startRecording, stopRecording, clearRecording } = useMediaRecorder()
  
    // Store access - Updated August 9, 2025
    const showMessage = useUIStore(state => state.showMessageModal)
@@ -423,7 +423,7 @@
              >
                <i className="fas fa-microphone text-base" aria-hidden="true"></i>
                <span>
-                 {isRecording ? 'Recording...' : audioUrl ? 'Audio Recorded' : 'Add Audio'}
+                 {isRecording ? `${60 - recordingDuration}s` : audioUrl ? 'Audio Recorded' : 'Add Audio'}
                </span>
              </button>
            </div>
