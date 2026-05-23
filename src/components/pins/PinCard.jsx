@@ -93,13 +93,6 @@
                : null
            }
              <button
-               onClick={handleShareClick}
-               className="w-6 h-6 flex items-center justify-center rounded-full bg-customBackground text-customPurpleText transition-colors"
-               title="Share vibe"
-             >
-               <i className="fas fa-share-alt text-xs"></i>
-             </button>
-             <button
                onClick={handleDeleteClick}
                className="w-6 h-6 flex items-center justify-center rounded-full bg-customBackground text-customPurpleText transition-colors"
                title="Delete pin"
@@ -133,6 +126,7 @@
          {/* Media Controls Section - EXACT ORIGINAL */}
          <div className="flex justify-between items-center">
            <div className="flex items-center space-x-3">
+
              
              {/* Audio Control - EXACT ORIGINAL STYLING AND BEHAVIOR */}
              {pin.audioUrl && (
@@ -164,6 +158,15 @@
                </button>
              )}
            </div>
+
+           {/* Share Button - bottom right */}
+           <button
+             onClick={handleShareClick}
+             className="w-12 h-12 rounded-full flex items-center justify-center bg-customBackground text-customPurpleText transition-colors"
+             title="Share vibe"
+           >
+             <i className="fas fa-share-alt text-L"></i>
+           </button>
          </div>
        </div>
      </div>
