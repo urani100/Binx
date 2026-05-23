@@ -271,9 +271,9 @@
          </div>
 
          {/* Tabbed Section */}
-         <div className="bg-customBackground rounded-xl p-4 mb-6">
+         <div className="mb-6">
            {/* Tab Row */}
-           <div className="flex gap-2 mb-4">
+           <div className="flex">
              {[
                { id: 'about', label: `About ${user?.name?.charAt(0) || ''}` },
                { id: 'personalize', label: 'Personalize B' },
@@ -288,20 +288,22 @@
                    else if (tab.id === 'sent') { setShowSentVibes(true) }
                    else { setActiveTab(tab.id) }
                  }}
-                 className={`flex-1 py-2 px-2 rounded-lg text-lg font-medium transition-colors ${
+                 className={`flex-1 py-2 px-2 rounded-t-xl text-xl font-medium transition-colors ${
                    activeTab === tab.id
                      ? 'bg-customPurple text-white'
-                     : 'text-gray-500 hover:text-customPurpleText'
+                     : 'bg-customBackground text-customPurpleText'
                  }`}
                >
                  {tab.label}
                </button>
              ))}
            </div>
+           {/* Thin strip */}
+           <div className="h-px bg-customPurple w-full" />
 
            {/* About Tab Content */}
            {activeTab === 'about' && (
-             <div className="space-y-2">
+             <div className="bg-customBackground rounded-b-xl p-4 space-y-2">
                <div className="flex justify-end mb-2">
                  <button
                    onClick={handleEditProfile}
