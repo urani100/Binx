@@ -233,9 +233,7 @@
                  {/* Form Fields */}
                  <div className="space-y-4">
                      {step === 0 && (
-                         <div className="rounded-xl bg-gray-50 p-6">
-                             <h4 className="text-l text-gray-700">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
-                         </div>
+                         <h4 className="text-l text-gray-700">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
                      )}
                      {step > 0 && <h3 className="text-xl font-semibold text-gray-800">{getStepTitle()}</h3>}
                      {step === 1 && renderCheckboxGroup(activityOptions, 'activityTypes')}
@@ -277,7 +275,7 @@
  
                      <div className="flex-1"></div>
   
-                     <button
+                     {step > 0 && <button
                          onClick={handleSave}
                          disabled={loading}
                          className="w-24 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
@@ -287,7 +285,7 @@
                          ) : (
                              'Save'
                          )}
-                     </button>
+                     </button>}
                  </div>
              </div>
          </div>
