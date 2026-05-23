@@ -111,17 +111,17 @@ const SentVibesModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {!expired && (
-                  <div className="flex space-x-3">
+                  <div className="flex justify-center space-x-3">
                     <button
                       onClick={() => handleCopyLink(share)}
-                      className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+                      className="py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
                     >
                       {copiedId === share.id ? 'Copied!' : 'Copy Link'}
                     </button>
                     <button
                       onClick={() => handleRevoke(share.id)}
                       disabled={revokingId === share.id}
-                      className="flex-1 py-3 px-4 bg-customPurpleText text-white rounded-xl font-medium disabled:opacity-40 hover:opacity-90 flex items-center justify-center"
+                      className="py-3 px-4 bg-customPurpleText text-white rounded-xl font-medium disabled:opacity-40 hover:opacity-90 flex items-center justify-center"
                     >
                       {revokingId === share.id ? '...' : 'Revoke'}
                     </button>
