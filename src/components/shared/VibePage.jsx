@@ -42,7 +42,7 @@ const VibePage = ({ token }) => {
       <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-lg">
           <img src="/Binx2.png" alt="BiNx" className="w-16 h-16 rounded-full mx-auto mb-4" />
-          <p className="text-sm text-gray-500">Your vibe must have expired...</p>
+          <p className="text-sm text-gray-500">This vibe expired...</p>
         </div>
       </div>
     )
