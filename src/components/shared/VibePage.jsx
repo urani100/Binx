@@ -34,21 +34,8 @@ const VibePage = ({ token }) => {
     return (
       <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-lg">
-          <div className="text-4xl mb-4">{errorType === 'expired' ? '⏰' : '🔍'}</div>
-          <h1 className="text-xl font-medium text-gray-900 mb-2">
-            {errorType === 'expired' ? 'This vibe has expired' : 'Vibe not found'}
-          </h1>
-          <p className="text-sm text-gray-500 mb-6">
-            {errorType === 'expired'
-              ? 'This moment was only meant to last a little while.'
-              : 'This link may be invalid or has been revoked.'}
-          </p>
-          <a
-            href="https://binx.social"
-            className="inline-block px-6 py-3 bg-customPurple text-white rounded-xl font-medium text-sm"
-          >
-            Open BiNx
-          </a>
+          <img src="/Binx2.png" alt="BiNx" className="w-16 h-16 rounded-full mx-auto mb-4" />
+          <p className="text-sm text-gray-500">Your vibe must have expired...</p>
         </div>
       </div>
     )
