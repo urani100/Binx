@@ -288,7 +288,7 @@
                    else if (tab.id === 'sent') { setShowSentVibes(true) }
                    else { setActiveTab(tab.id) }
                  }}
-                 className={`flex-1 py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
+                 className={`flex-1 py-2 px-2 rounded-lg text-lg font-medium transition-colors ${
                    activeTab === tab.id
                      ? 'bg-customPurple text-white'
                      : 'text-gray-500 hover:text-customPurpleText'
