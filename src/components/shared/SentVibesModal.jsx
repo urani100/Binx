@@ -58,10 +58,9 @@ const SentVibesModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="sent-vibes-title">
       <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left max-h-[90vh] overflow-y-auto">
 
-        <div className="flex justify-between items-center mb-4">
-          <div className="w-5" />
+        <div className="relative flex items-center justify-center mb-4">
           <h3 id="sent-vibes-title" className="text-xl font-semibold text-customPurpleText">Shared Vibes</h3>
-          <button onClick={onClose} className="w-5 text-customPurpleText transition-colors text-right">✕</button>
+          <button onClick={onClose} className="absolute right-0 text-customPurpleText transition-colors" aria-label="Close">✕</button>
         </div>
 
         {loading && (
@@ -115,14 +114,14 @@ const SentVibesModal = ({ isOpen, onClose }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleCopyLink(share)}
-                      className="flex-1 py-3 text-sm bg-customBackground text-customPurpleText rounded-xl font-medium transition-colors"
+                      className="flex-1 py-3 px-4 text-sm bg-customBackground text-customPurpleText rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
                     >
                       {copiedId === share.id ? 'Copied!' : 'Copy Link'}
                     </button>
                     <button
                       onClick={() => handleRevoke(share.id)}
                       disabled={revokingId === share.id}
-                      className="px-3 py-3 text-sm text-red-400 border border-red-100 rounded-xl disabled:opacity-40"
+                      className="px-4 py-3 text-sm text-red-400 border border-red-100 rounded-xl font-medium disabled:opacity-40 hover:opacity-90 flex items-center justify-center"
                     >
                       {revokingId === share.id ? '...' : 'Revoke'}
                     </button>
