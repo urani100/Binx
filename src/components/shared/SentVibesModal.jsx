@@ -121,7 +121,7 @@ const SentVibesModal = ({ isOpen, onClose }) => {
                     <button
                       onClick={() => handleRevoke(share.id)}
                       disabled={revokingId === share.id}
-                      className="flex-1 py-3 px-4 text-sm bg-red-50 text-red-400 rounded-xl font-medium disabled:opacity-40 hover:opacity-90 flex items-center justify-center"
+                      className="flex-1 py-3 px-4 text-sm bg-customBackground text-customPurpleText rounded-xl font-medium disabled:opacity-40 hover:opacity-90 flex items-center justify-center"
                     >
                       {revokingId === share.id ? '...' : 'Revoke'}
                     </button>
