@@ -276,7 +276,7 @@
            <div className="flex gap-1">
              {[
                { id: 'about', label: `About ${user?.name?.charAt(0) || ''}` },
-               { id: 'personalize', label: 'Personalize B' },
+               { id: 'personalize', label: 'Tailor B' },
                { id: 'saved', label: 'Saved R' },
                { id: 'sent', label: 'Shared V' },
              ].map(tab => (

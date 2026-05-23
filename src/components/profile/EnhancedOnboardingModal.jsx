@@ -218,7 +218,7 @@
                  {/* Header */}
                  <div className="flex justify-between items-center mb-4">
                      <p className="text-sm text-gray-500">Step {step + 1} of {totalSteps}</p>
-                     <h3 className="text-xl font-semibold text-customPurpleText">Personalize BiNx</h3>
+                     <h3 className="text-xl font-semibold text-customPurpleText">Tailor BiNX</h3>
                      <button
                          onClick={onClose}
                          className="text-customPurpleText transition-colors"
