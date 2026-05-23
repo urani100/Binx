@@ -139,11 +139,12 @@ function vibePage(pinData, token) {
   const description = truncate(pin.note)
   const url = `https://binx.social/vibe/${token}`
 
-  const ogImage = pin.photo ? `
-  <meta property="og:image" content="${escapeHtml(pin.photo)}" />
+  const ogImageUrl = `https://binx.social/api/og?token=${token}`
+  const ogImage = `
+  <meta property="og:image" content="${ogImageUrl}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta name="twitter:image" content="${escapeHtml(pin.photo)}" />` : ''
+  <meta name="twitter:image" content="${ogImageUrl}" />`
 
   const photoHtml = pin.photo
     ? `<div class="section"><img src="${escapeHtml(pin.photo)}" alt="Pin photo" class="photo" /></div>`
@@ -166,7 +167,7 @@ function vibePage(pinData, token) {
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="BiNx" />${ogImage}
 
-  <meta name="twitter:card" content="${pin.photo ? 'summary_large_image' : 'summary'}" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(pageTitle)}" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
 
