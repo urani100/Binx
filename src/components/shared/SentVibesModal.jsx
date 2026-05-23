@@ -59,11 +59,8 @@ const SentVibesModal = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left">
 
         <div className="flex justify-between items-center mb-6">
-          <button onClick={onClose} className="text-customPurpleText transition-colors">
-            ← Back
-          </button>
-          <h2 className="text-base font-semibold text-gray-900">Sent Vibes</h2>
-          <div className="w-12" />
+          <h2 className="text-xl font-semibold text-customPurpleText">Shared Vibes</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
         </div>
 
         {loading && (

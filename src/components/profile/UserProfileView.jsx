@@ -273,7 +273,7 @@
          {/* Tabbed Section */}
          <div className="mb-6">
            {/* Tab Row */}
-           <div className="flex">
+           <div className="flex gap-1">
              {[
                { id: 'about', label: `About ${user?.name?.charAt(0) || ''}` },
                { id: 'personalize', label: 'Personalize B' },
