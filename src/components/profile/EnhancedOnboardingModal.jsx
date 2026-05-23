@@ -220,7 +220,7 @@
                  {/* Header */}
                  <div className="flex justify-between items-center mb-4">
                      <p className="text-sm text-gray-500">{step > 0 ? `Step ${step} of ${totalSteps}` : ''}</p>
-                     <h3 className="text-xl font-semibold text-customPurpleText">Tailor BiNX</h3>
+                     <h3 className="text-xl font-semibold text-customPurpleText">{step === 0 ? 'Tailor BiNX' : getStepTitle()}</h3>
                      <button
                          onClick={onClose}
                          className="text-customPurpleText transition-colors"
@@ -235,7 +235,6 @@
                      {step === 0 && (
                          <h4 className="text-l text-gray-700">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
                      )}
-                     {step > 0 && <h3 className="text-xl font-semibold text-gray-800">{getStepTitle()}</h3>}
                      {step === 1 && renderCheckboxGroup(activityOptions, 'activityTypes')}
                      {step === 2 && renderCheckboxGroup(cuisineOptions, 'cuisinePreferences')}
                      {step === 3 && renderRadioGroup(priceOptions, 'priceComfort')}
