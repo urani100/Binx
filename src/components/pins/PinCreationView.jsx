@@ -317,7 +317,7 @@
            {/* Title Input Section */}
            <div>
              <label className="block text-l ont-medium  text-customPurpleText mb-2">
-               What's the vibe? <span className="text-customPurple">*</span>
+               <span className="text-customPurple text-xs align-super mr-1">*</span>What's the vibe?
              </label>
              <input
                type="text"
@@ -332,7 +332,7 @@
            {/* Mood Selection Section */}
            <div>
              <label className="block text-l ont-medium text-customPurpleText mb-2">
-               Capture the mood! <span className="text-customPurple">*</span>
+               <span className="text-customPurple text-xs align-super mr-1">*</span>Capture the mood!
              </label>
 
              {/* Category filter pills */}
