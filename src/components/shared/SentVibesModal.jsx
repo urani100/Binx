@@ -55,20 +55,27 @@ const SentVibesModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="sent-vibes-title">
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left max-h-[90vh] overflow-y-auto">
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-customPurpleText">Shared Vibes</h2>
+        <div className="flex justify-between items-center mb-4">
+          <div className="w-5" />
+          <h3 id="sent-vibes-title" className="text-xl font-semibold text-customPurpleText">Shared Vibes</h3>
           <button onClick={onClose} className="text-customPurpleText transition-colors">✕</button>
         </div>
 
         {loading && (
-          <p className="text-sm text-gray-400 text-center py-8">Loading...</p>
+          <p className="text-sm text-customPurpleText font-medium text-center py-8">Loading...</p>
         )}
 
         {!loading && shares.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-8">You haven't shared any vibes yet.</p>
+          <div className="text-center py-8">
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-share-alt text-gray-400"></i>
+            </div>
+            <p className="text-gray-500 text-sm">You haven't shared any vibes yet.</p>
+            <p className="text-gray-400 text-xs mt-1">Share a pin to see it here.</p>
+          </div>
         )}
 
         <div className="space-y-3">
@@ -108,14 +115,14 @@ const SentVibesModal = ({ isOpen, onClose }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleCopyLink(share)}
-                      className="flex-1 py-2 text-sm bg-customBackground text-customPurpleText rounded-lg font-medium transition-colors"
+                      className="flex-1 py-2 text-sm bg-customBackground text-customPurpleText rounded-xl font-medium transition-colors"
                     >
                       {copiedId === share.id ? 'Copied!' : 'Copy Link'}
                     </button>
                     <button
                       onClick={() => handleRevoke(share.id)}
                       disabled={revokingId === share.id}
-                      className="px-3 py-2 text-sm text-red-400 border border-red-100 rounded-lg disabled:opacity-40"
+                      className="px-3 py-2 text-sm text-red-400 border border-red-100 rounded-xl disabled:opacity-40"
                     >
                       {revokingId === share.id ? '...' : 'Revoke'}
                     </button>
