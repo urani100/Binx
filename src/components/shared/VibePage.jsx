@@ -57,12 +57,6 @@ const VibePage = ({ token }) => {
   const { pin, share } = data
   const { date, time } = formatTimestamp(pin.timestamp)
 
-  const sentDate = new Date(share.createdAt).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric'
-  })
-  const sentTime = new Date(share.createdAt).toLocaleTimeString([], {
-    hour: '2-digit', minute: '2-digit'
-  })
   const expiryDate = new Date(share.expiresAt).toLocaleDateString('en-US', {
     month: '2-digit', day: '2-digit', year: '2-digit'
   })
@@ -78,7 +72,6 @@ const VibePage = ({ token }) => {
         <div className="flex justify-center mb-6">
           <div className="text-center">
             <div className="text-2xl font-bold text-customPurpleText tracking-widest">BiNx</div>
-            <div className="text-xs text-gray-400 tracking-wider uppercase">A Vibe, Shared</div>
           </div>
         </div>
 
@@ -115,22 +108,11 @@ const VibePage = ({ token }) => {
           </div>
         )}
 
-        {/* Sender signature */}
+        {/* Expiry */}
         <div className="border-t border-gray-100 pt-5 mt-2">
-          <p className="text-sm text-gray-600 text-center mb-1">
-            <span className="font-medium">{share.senderFirstName}</span> sent you a Vibe · {sentDate} at {sentTime}
+          <p className="text-xs text-gray-400 text-center">
+            This vibe expires on {expiryDate} at {expiryTime}
           </p>
-          <p className="text-xs text-gray-400 text-center mb-5">
-            expires on {expiryDate} at {expiryTime}
-          </p>
-          <div className="flex justify-center">
-            <a
-              href="https://binx.social"
-              className="px-8 py-3 bg-customPurple text-white rounded-xl font-medium text-sm"
-            >
-              Open BiNx
-            </a>
-          </div>
         </div>
       </div>
     </div>
