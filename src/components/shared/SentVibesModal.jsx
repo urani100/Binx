@@ -86,7 +86,7 @@ const SentVibesModal = ({ isOpen, onClose }) => {
             return (
               <div
                 key={share.id}
-                className={`rounded-xl p-4 border border-gray-100 ${expired ? 'opacity-60' : ''}`}
+                className={`rounded-xl p-5 border border-gray-100 ${expired ? 'opacity-60' : ''}`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <p className="text-sm font-medium text-gray-900 flex-1 mr-2">
@@ -103,7 +103,7 @@ const SentVibesModal = ({ isOpen, onClose }) => {
                   <p className="text-xs text-gray-500 mb-2 italic">"{share.recipient_note}"</p>
                 )}
 
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
+                <div className="flex items-center justify-between text-xs text-gray-400 mb-5">
                   <span>
                     {share.view_count === 0 ? 'Not yet opened' : `Seen ${share.view_count}×`}
                   </span>
