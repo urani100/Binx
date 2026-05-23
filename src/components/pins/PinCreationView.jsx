@@ -413,12 +413,12 @@
              <button
                onClick={isRecording ? stopRecording : startRecording}
                className={`flex items-center justify-center space-x-2 py-3 rounded-xl font-medium transition-colors ${isRecording
-                 ? 'bg-red-500 text-white animate-pulse'
+                 ? 'bg-customPurple text-white animate-pulse'
                  : audioUrl
-                   ? 'text-white'
+                   ? 'bg-customPurple text-white'
                    : 'bg-gray-100 text-customPurpleText'
                  }`}
-               style={audioUrl && !isRecording ? { backgroundColor: '#555' } : {}}
+               style={{}}
                aria-label={isRecording ? 'Stop recording' : 'Start recording'}
              >
                <i className="fas fa-microphone text-base" aria-hidden="true"></i>
