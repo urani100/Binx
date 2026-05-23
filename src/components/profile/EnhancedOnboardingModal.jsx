@@ -18,7 +18,7 @@
      const showMessage = useUIStore(state => state.showMessageModal)
      const [loading, setLoading] = useState(false)
      const [step, setStep] = useState(0)
-     const totalSteps = 8
+     const totalSteps = 7
      
      // Form state for all preferences
      const [preferences, setPreferences] = useState({
@@ -219,7 +219,7 @@
 
                  {/* Header */}
                  <div className="flex justify-between items-center mb-4">
-                     <p className="text-sm text-gray-500">Step {step + 1} of {totalSteps}</p>
+                     <p className="text-sm text-gray-500">{step > 0 ? `Step ${step} of ${totalSteps}` : ''}</p>
                      <h3 className="text-xl font-semibold text-customPurpleText">Tailor BiNX</h3>
                      <button
                          onClick={onClose}
@@ -234,8 +234,7 @@
                  <div className="space-y-4">
                      {step === 0 && (
                          <div className="rounded-xl bg-gray-50 p-6">
-                             <h3 className="text-xl font-semibold text-customPurpleText">Tailor BiNX</h3>
-                             <h4 className="text-l text-gray-700 mt-4">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
+                             <h4 className="text-l text-gray-700">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
                          </div>
                      )}
                      {step > 0 && <h3 className="text-xl font-semibold text-gray-800">{getStepTitle()}</h3>}
