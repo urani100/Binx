@@ -106,6 +106,9 @@ export const useMediaRecorder = () => {
       }
 
       recorder.onstop = () => {
+        setIsRecording(false)
+        setMediaRecorder(null)
+
         if (chunksRef.current.length === 0) {
           console.error('No audio chunks recorded')
           showMessage('Recording Error', 'No audio data was recorded. Please try again.')
