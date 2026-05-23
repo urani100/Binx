@@ -5,7 +5,7 @@ import './index.css'
 import { GOOGLE_MAPS_CONFIG } from './utils/constants'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
-const vibeMatch = window.location.pathname.match(/^\/vibe\/([A-Za-z0-9_-]+)$/)
+const vibeMatch = window.location.pathname.match(/^\/view\/([A-Za-z0-9_-]+)$/)
 const vibeToken = vibeMatch ? vibeMatch[1] : null
 
 if (vibeToken) {
