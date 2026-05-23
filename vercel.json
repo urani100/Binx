@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/vibe/:token", "destination": "/api/vibe?token=:token" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
