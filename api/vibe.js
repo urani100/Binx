@@ -136,15 +136,12 @@ function vibePage(pinData, token) {
 
   const mood    = pin.mood ? pin.mood.charAt(0).toUpperCase() + pin.mood.slice(1) : ''
   const pageTitle = `${pin.title} — BiNx`
-  const description = truncate(pin.note)
+  const description = `${share.senderFirstName} sent you a Vibe`
   const url = `https://binx.social/vibe/${token}`
 
-  const ogImageUrl = `https://binx.social/api/og?token=${token}`
-  const ogImage = `
-  <meta property="og:image" content="${ogImageUrl}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:image" content="${ogImageUrl}" />`
+  const ogImage = pin.photo ? `
+  <meta property="og:image" content="${escapeHtml(pin.photo)}" />
+  <meta name="twitter:image" content="${escapeHtml(pin.photo)}" />` : ''
 
   const photoHtml = pin.photo
     ? `<div class="section"><img src="${escapeHtml(pin.photo)}" alt="Pin photo" class="photo" /></div>`
