@@ -230,7 +230,7 @@
 
          {/* Guide Selection Section */}
          <div className="mb-6">
-           <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-4">Change Avatar</h3>
+           <h3 className="text-xl font-semibold text-customPurpleText mb-4 pl-4">Pick your guide</h3>
            <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory">
              <div className="flex gap-4 px-6" ref={guideScrollRef}>
                {GUIDES.map((guide) => (
