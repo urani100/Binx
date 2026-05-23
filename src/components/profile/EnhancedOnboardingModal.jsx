@@ -18,7 +18,7 @@
      const showMessage = useUIStore(state => state.showMessageModal)
      const [loading, setLoading] = useState(false)
      const [step, setStep] = useState(0)
-     const totalSteps = 6
+     const totalSteps = 7
      
      // Form state for all preferences
      const [preferences, setPreferences] = useState({
@@ -160,7 +160,8 @@
              'Budget Preferences',
              'Discovery Style',
              'Social Style',
-             'Final Touches'
+             'Aesthetic Preferences',
+             'Avoid'
          ]
          return titles[step]
      }
@@ -237,18 +238,8 @@
                      {step === 2 && renderRadioGroup(priceOptions, 'priceComfort')}
                      {step === 3 && renderRadioGroup(discoveryOptions, 'discoveryStyle')}
                      {step === 4 && renderRadioGroup(socialOptions, 'socialPreference')}
-                     {step === 5 && (
-                         <div className="space-y-4">
-                             <div>
-                                 <label className="text-sm font-semibold text-gray-700 block mb-3">Aesthetic Preferences</label>
-                                 {renderCheckboxGroup(aestheticOptions, 'aestheticPreferences')}
-                             </div>
-                             <div>
-                                 <label className="text-sm font-semibold text-gray-700 block mb-3">Avoid</label>
-                                 {renderCheckboxGroup(avoidanceOptions, 'avoidancePreferences')}
-                             </div>
-                         </div>
-                     )}
+                     {step === 5 && renderCheckboxGroup(aestheticOptions, 'aestheticPreferences')}
+                     {step === 6 && renderCheckboxGroup(avoidanceOptions, 'avoidancePreferences')}
                  </div>
   
                  {/* Action Buttons */}
