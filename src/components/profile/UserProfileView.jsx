@@ -14,7 +14,7 @@
  import { UserType } from '../../types'
  import { PALETTES, GUIDES } from '../../utils/constants'
  import { EnhancedOnboardingModal } from './index'
- import { SavedLocationsModal } from '../shared'
+ import { SavedLocationsModal, SentVibesModal } from '../shared'
  
  /**
   * UserProfileView Component - EXACT REPLICA
@@ -25,6 +25,7 @@
    const { pins } = usePins()
    const [showEnhancedOnboarding, setShowEnhancedOnboarding] = useState(false)
    const [showSavedLocations, setShowSavedLocations] = useState(false)
+   const [showSentVibes, setShowSentVibes] = useState(false)
  
    // UI Store for theme management
    const selectedPaletteName = useUIStore(state => state.selectedPaletteName)
@@ -367,6 +368,12 @@
              >
                Saved Recommendations
              </button>
+             <button
+               onClick={() => setShowSentVibes(true)}
+               className="flex-1 py-3 px-4 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
+             >
+               Sent Vibes
+             </button>
            </div>
          </div>
        </div>
@@ -382,6 +389,12 @@
        <SavedLocationsModal
          isOpen={showSavedLocations}
          onClose={() => setShowSavedLocations(false)}
+       />
+
+       {/* Sent Vibes Modal */}
+       <SentVibesModal
+         isOpen={showSentVibes}
+         onClose={() => setShowSentVibes(false)}
        />
      </div>
    )

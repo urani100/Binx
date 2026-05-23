@@ -5,23 +5,26 @@
  * Date: August 8, 2025
  */
 
- import React, { useEffect } from 'react'
+ import React, { useEffect, useState } from 'react'
  import PropTypes from 'prop-types'
  import { PinType } from '../../types'
  import { VibeTag } from '../ui'
  import { CustomAudioPlayer } from '../shared'
  import { formatTimestamp } from '../../utils/helpers'
+ import { shareVibe } from '../../services/shareService'
  
  /**
   * PinDetailView Component - EXACT REPLICA
   * Shows full pin details in modal overlay
   */
- const PinDetailView = ({ 
-   isOpen, 
-   pin, 
-   onClose, 
-   onDelete 
+ const PinDetailView = ({
+   isOpen,
+   pin,
+   onClose,
+   onDelete
  }) => {
+   const [sharing, setSharing] = useState(false)
+   const [shareFeedback, setShareFeedback] = useState(null)
    // Handle escape key - EXACT ORIGINAL
    useEffect(() => {
      const handleEscape = (e) => {
@@ -58,6 +61,24 @@
        onDelete(pin)
      }
    }
+
+   const handleShare = async () => {
+     if (sharing) return
+     setSharing(true)
+     setShareFeedback(null)
+     try {
+       const result = await shareVibe(pin)
+       if (result.method === 'copied') {
+         setShareFeedback('Link copied!')
+         setTimeout(() => setShareFeedback(null), 2500)
+       }
+     } catch (err) {
+       setShareFeedback('Could not share')
+       setTimeout(() => setShareFeedback(null), 2500)
+     } finally {
+       setSharing(false)
+     }
+   }
  
    return (
      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -79,10 +100,20 @@
              >
                <i className="fas fa-trash-alt text-sm"></i>
              </button>
-               {/* Hiding SHARE BUTTON for now ... no functionality */}
-             {/* <button className="text-customPurpleText">
-               <i className="fas fa-share-alt text-base"></i>
-             </button> */}
+             <button
+               onClick={handleShare}
+               disabled={sharing}
+               className="w-8 h-8 flex items-center justify-center rounded-full bg-customBackground text-customPurpleText transition-colors disabled:opacity-50"
+               title="Share vibe"
+             >
+               {sharing
+                 ? <i className="fas fa-circle-notch fa-spin text-sm"></i>
+                 : <i className="fas fa-share-alt text-sm"></i>
+               }
+             </button>
+             {shareFeedback && (
+               <span className="text-xs text-customPurpleText">{shareFeedback}</span>
+             )}
            </div>
          </div>
  

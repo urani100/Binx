@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
     CHECK_REC_PROXIMITY:    `${_supabaseBase}/functions/v1/check-recommendation-proximity`,
     COMPUTE_TASTE_SUMMARY:  `${_supabaseBase}/functions/v1/compute-taste-summary`,
     RECOMMENDATION_SESSION: `${_supabaseBase}/functions/v1/recommendation-session`,
+    CREATE_SHARE:           `${_supabaseBase}/functions/v1/create-pin-share`,
+    GET_SHARED_PIN:         `${_supabaseBase}/functions/v1/get-shared-pin`,
   }
   
   // Google Maps Configuration (Restricted Frontend Key)

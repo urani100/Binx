@@ -15,6 +15,8 @@
  export { default as SavedLocationsModal } from './SavedLocationsModal'
  export { default as RecommendationCard } from './RecommendationCard'
  export { default as RefineSearchModal } from './RefineSearchModal'
+ export { default as VibePage } from './VibePage'
+ export { default as SentVibesModal } from './SentVibesModal'
 
 
 

@@ -22,9 +22,9 @@
    ErrorBoundary,
    RecommendationsModal
  } from './components/shared'
- 
+
  import './App.css'
- 
+
  function App() {
    const { user, isAuthenticated, initialize, profileLoaded } = useAuth()
    const { deletePin } = usePins()
