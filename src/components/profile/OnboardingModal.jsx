@@ -122,7 +122,11 @@
          {/* Header */}
          <div className="flex justify-between items-center mb-4">
            <p className="text-sm text-gray-500">Step {step + 1} of {totalSteps}</p>
-           <h3 className="text-xl font-semibold text-customPurpleText">Edit Profile</h3>
+           <h3 className="text-xl font-semibold text-customPurpleText">
+             {step === 0 && `About ${user?.name || 'You'}`}
+             {step === 1 && 'Media & Hobbies'}
+             {step === 2 && 'Personal Style & Lifestyle'}
+           </h3>
            <button
              onClick={onClose}
              className="text-customPurpleText transition-colors"
@@ -137,7 +141,6 @@
            {step === 0 && (
              // About Me section
              <div className="space-y-4">
-               <h3 className="text-xl font-semibold text-gray-800">About Me</h3>
                <div>
                  <label className="text-sm font-semibold text-gray-700">Alter Ego</label>
                  <input
@@ -182,7 +185,6 @@
            {step === 1 && (
              // Media & Hobbies section
              <div className="space-y-4">
-               <h3 className="text-xl font-semibold text-gray-800">Media & Hobbies</h3>
                <div>
                  <label className="text-sm font-semibold text-gray-700">Currently Reading</label>
                  <input
@@ -240,7 +242,6 @@
            {step === 2 && (
              // Personal Style & Lifestyle section
              <div className="space-y-4">
-               <h3 className="text-xl font-semibold text-gray-800">Personal Style & Lifestyle</h3>
                <div>
                  <label className="text-sm font-semibold text-gray-700">Currently Wearing</label>
                  <input
