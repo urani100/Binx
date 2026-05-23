@@ -2,15 +2,13 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import { GOOGLE_MAPS_CONFIG, PALETTES } from './utils/constants'
-import { applyTheme } from './utils/helpers'
+import { GOOGLE_MAPS_CONFIG } from './utils/constants'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const vibeMatch = window.location.pathname.match(/^\/view\/([A-Za-z0-9_-]+)$/)
 const vibeToken = vibeMatch ? vibeMatch[1] : null
 
 if (vibeToken) {
-  applyTheme(PALETTES[0])
   import('./components/shared/VibePage.jsx').then(({ default: VibePage }) => {
     ReactDOM.createRoot(document.getElementById('root')).render(
       <React.StrictMode>
