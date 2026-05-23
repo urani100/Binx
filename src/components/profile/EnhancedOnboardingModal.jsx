@@ -18,7 +18,7 @@
      const showMessage = useUIStore(state => state.showMessageModal)
      const [loading, setLoading] = useState(false)
      const [step, setStep] = useState(0)
-     const totalSteps = 7
+     const totalSteps = 8
      
      // Form state for all preferences
      const [preferences, setPreferences] = useState({
@@ -155,6 +155,7 @@
      // Get step titles
      const getStepTitle = () => {
          const titles = [
+             '',
              'Activity Preferences',
              'Cuisine Preferences',
              'Budget Preferences',
@@ -231,15 +232,20 @@
   
                  {/* Form Fields */}
                  <div className="space-y-4">
-                     <h3 className="text-xl font-semibold text-gray-800">{getStepTitle()}</h3>
-                     
-                     {step === 0 && renderCheckboxGroup(activityOptions, 'activityTypes')}
-                     {step === 1 && renderCheckboxGroup(cuisineOptions, 'cuisinePreferences')}
-                     {step === 2 && renderRadioGroup(priceOptions, 'priceComfort')}
-                     {step === 3 && renderRadioGroup(discoveryOptions, 'discoveryStyle')}
-                     {step === 4 && renderRadioGroup(socialOptions, 'socialPreference')}
-                     {step === 5 && renderCheckboxGroup(aestheticOptions, 'aestheticPreferences')}
-                     {step === 6 && renderCheckboxGroup(avoidanceOptions, 'avoidancePreferences')}
+                     {step === 0 && (
+                         <div className="rounded-xl bg-gray-50 p-6">
+                             <h3 className="text-xl font-semibold text-customPurpleText">Tailor BiNX</h3>
+                             <h4 className="text-l text-gray-700 mt-4">BiNx starts noticing what you're drawn to, the atmosphere you gravitate toward or the type of experience you're usually in the mood for. The more it learns, the more it feels like it's reading your mind when suggesting new places. Share a bit about what you enjoy and watch it get really good at this.</h4>
+                         </div>
+                     )}
+                     {step > 0 && <h3 className="text-xl font-semibold text-gray-800">{getStepTitle()}</h3>}
+                     {step === 1 && renderCheckboxGroup(activityOptions, 'activityTypes')}
+                     {step === 2 && renderCheckboxGroup(cuisineOptions, 'cuisinePreferences')}
+                     {step === 3 && renderRadioGroup(priceOptions, 'priceComfort')}
+                     {step === 4 && renderRadioGroup(discoveryOptions, 'discoveryStyle')}
+                     {step === 5 && renderRadioGroup(socialOptions, 'socialPreference')}
+                     {step === 6 && renderCheckboxGroup(aestheticOptions, 'aestheticPreferences')}
+                     {step === 7 && renderCheckboxGroup(avoidanceOptions, 'avoidancePreferences')}
                  </div>
   
                  {/* Action Buttons */}
