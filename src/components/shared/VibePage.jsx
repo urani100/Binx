@@ -4,6 +4,7 @@ import { VibeTag } from '../ui'
 import CustomAudioPlayer from './CustomAudioPlayer'
 import { formatTimestamp } from '../../utils/helpers'
 import { API_ENDPOINTS } from '../../utils/constants'
+import { edgeFunctionHeaders } from '../../services/supabase'
 
 const VibePage = ({ token }) => {
   const [data, setData] = useState(null)
@@ -11,7 +12,7 @@ const VibePage = ({ token }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${API_ENDPOINTS.GET_SHARED_PIN}?token=${encodeURIComponent(token)}`)
+    fetch(`${API_ENDPOINTS.GET_SHARED_PIN}?token=${encodeURIComponent(token)}`, { headers: edgeFunctionHeaders })
       .then(res => {
         if (!res.ok) return res.json().then(e => Promise.reject(e))
         return res.json()
