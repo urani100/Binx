@@ -100,7 +100,7 @@ const VibePage = ({ token }) => {
 
         {/* Audio */}
         {pin.audioUrl && pin.audioUrl !== 'demo-audio' && (
-          <div className="bg-white border border-gray-100 rounded-xl p-4 mb-6">
+          <div className="bg-white border border-gray-100 rounded-xl mb-6">
             <CustomAudioPlayer src={pin.audioUrl} />
           </div>
         )}
