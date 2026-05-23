@@ -39,11 +39,14 @@ const VibePage = ({ token }) => {
 
   if (errorType) {
     return (
-      <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4">
+      <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4 relative">
         <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-lg">
           <img src="/Binx2.png" alt="BiNx" className="w-16 h-16 rounded-full mx-auto mb-4" />
           <p className="text-sm text-gray-500">This vibe expired...</p>
         </div>
+        <footer className="absolute bottom-0 left-0 right-0 py-4">
+          <p className="text-center text-sm text-gray-400">© 2026 binx.social</p>
+        </footer>
       </div>
     )
   }
@@ -59,7 +62,7 @@ const VibePage = ({ token }) => {
   })
 
   return (
-    <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4 overflow-y-auto">
+    <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4 overflow-y-auto relative">
       <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left">
 
         {/* BiNx stamp */}
@@ -109,6 +112,9 @@ const VibePage = ({ token }) => {
           </p>
         </div>
       </div>
+      <footer className="absolute bottom-0 left-0 right-0 py-4">
+        <p className="text-center text-sm text-gray-400">© 2026 binx.social</p>
+      </footer>
     </div>
   )
 }

@@ -197,7 +197,7 @@ const AuthView = () => {
   }
 
   return (
-    <div className="max-w-sm mx-auto bg-gray-50 min-h-screen flex items-center justify-center">
+    <div className="max-w-sm mx-auto bg-gray-50 min-h-screen flex items-center justify-center relative">
       <div className="w-full p-6">
         {/* Header */}
         <div className="text-center mb-8">
@@ -402,6 +402,9 @@ const AuthView = () => {
           </>
         )}
       </div>
+      <footer className="absolute bottom-0 left-0 right-0 py-4">
+        <p className="text-center text-sm text-gray-400">© 2026 binx.social</p>
+      </footer>
     </div>
   )
 }
