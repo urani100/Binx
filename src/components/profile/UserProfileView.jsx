@@ -304,14 +304,6 @@
            {/* About Tab Content */}
            {activeTab === 'about' && (
              <div className="bg-customBackground rounded-b-xl p-4 space-y-2">
-               <div className="flex justify-end mb-2">
-                 <button
-                   onClick={handleEditProfile}
-                   className="px-4 py-2 bg-customPurple text-white rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
-                 >
-                   Edit
-                 </button>
-               </div>
                {user?.profile?.alterEgo && (
                  <p className="text-base font-bold text-customPurpleText">
                    Alter Ego: <span className="font-normal text-gray-400">{user.profile.alterEgo}</span>
@@ -372,6 +364,14 @@
                    Complete your profile to personalize your experience.
                  </p>
                )}
+               <div className="flex justify-center pt-4">
+                 <button
+                   onClick={handleEditProfile}
+                   className="w-28 py-3 bg-customPurple text-white rounded-xl font-medium hover:opacity-90 transition-colors flex items-center justify-center"
+                 >
+                   Edit
+                 </button>
+               </div>
              </div>
            )}
          </div>
