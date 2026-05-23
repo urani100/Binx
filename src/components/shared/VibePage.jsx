@@ -24,7 +24,7 @@ const VibePage = ({ token }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center">
         <p className="text-sm text-gray-400">Loading vibe...</p>
       </div>
     )
@@ -32,7 +32,7 @@ const VibePage = ({ token }) => {
 
   if (errorType) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-lg">
           <div className="text-4xl mb-4">{errorType === 'expired' ? '⏰' : '🔍'}</div>
           <h1 className="text-xl font-medium text-gray-900 mb-2">
@@ -65,7 +65,7 @@ const VibePage = ({ token }) => {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="max-w-sm mx-auto min-h-screen bg-customBackground flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-lg my-auto text-left">
 
         {/* BiNx stamp */}
