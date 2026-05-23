@@ -111,7 +111,7 @@ const SentVibesModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {!expired && (
-                  <div className="flex justify-center space-x-3">
+                  <div className="flex justify-between">
                     <button
                       onClick={() => handleCopyLink(share)}
                       className="w-28 py-3 bg-customPurple text-white rounded-xl font-medium transition-colors hover:opacity-90 flex items-center justify-center"
