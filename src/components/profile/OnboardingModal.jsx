@@ -120,7 +120,7 @@
        <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-lg text-left">
 
          {/* Header */}
-         <div className="flex justify-between items-center mb-4">
+         <div className="flex justify-between items-center mb-6">
            <p className="text-sm text-gray-500">Step {step + 1} of {totalSteps}</p>
            <h3 className="text-xl font-semibold text-customPurpleText">
              {step === 0 && `About ${user?.name || 'You'}`}
