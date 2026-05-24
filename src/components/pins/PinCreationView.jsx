@@ -101,11 +101,9 @@
          setLocationName('Getting location...')
        }
  
-       // Clear the photo file inputs
-       const photoCameraInput = document.getElementById('photo-upload-camera')
-       if (photoCameraInput) photoCameraInput.value = ''
-       const photoGalleryInput = document.getElementById('photo-upload-gallery')
-       if (photoGalleryInput) photoGalleryInput.value = ''
+       // Clear the photo file input
+       const photoInput = document.getElementById('photo-upload')
+       if (photoInput) photoInput.value = ''
  
        // Clear any existing audio when opening a NEW pin
        if (audioUrl && clearRecording) {
@@ -257,10 +255,8 @@
     */
    const handleClearPhoto = () => {
      setNewPin(prev => ({ ...prev, photo: null }))
-     const photoCameraInput = document.getElementById('photo-upload-camera')
-     if (photoCameraInput) photoCameraInput.value = ''
-     const photoGalleryInput = document.getElementById('photo-upload-gallery')
-     if (photoGalleryInput) photoGalleryInput.value = ''
+     const photoInput = document.getElementById('photo-upload')
+     if (photoInput) photoInput.value = ''
    }
  
    /**
@@ -432,37 +428,21 @@
            {/* Media Upload Section */}
            <div className="grid grid-cols-2 gap-3">
  
-             {/* Photo Upload Buttons */}
-             <input
-               type="file"
-               accept="image/*"
-               capture="environment"
-               onChange={handlePhotoUpload}
-               className="hidden"
-               id="photo-upload-camera"
-             />
+             {/* Photo Upload Button */}
              <input
                type="file"
                accept="image/*"
                onChange={handlePhotoUpload}
                className="hidden"
-               id="photo-upload-gallery"
+               id="photo-upload"
              />
              <label
-               htmlFor="photo-upload-camera"
+               htmlFor="photo-upload"
                className={`flex items-center justify-center space-x-2 py-3 rounded-xl font-medium transition-colors cursor-pointer ${newPin.photo ? 'text-white' : 'bg-gray-100 text-customPurpleText'}`}
                style={newPin.photo ? { backgroundColor: '#333' } : {}}
              >
                <i className="fas fa-camera text-base" aria-hidden="true"></i>
-               <span>{newPin.photo ? 'Photo Added' : 'Camera'}</span>
-             </label>
-             <label
-               htmlFor="photo-upload-gallery"
-               className={`flex items-center justify-center space-x-2 py-3 rounded-xl font-medium transition-colors cursor-pointer ${newPin.photo ? 'text-white' : 'bg-gray-100 text-customPurpleText'}`}
-               style={newPin.photo ? { backgroundColor: '#333' } : {}}
-             >
-               <i className="fas fa-image text-base" aria-hidden="true"></i>
-               <span>{newPin.photo ? 'Photo Added' : 'Gallery'}</span>
+               <span>{newPin.photo ? 'Photo Added' : 'Add Photo'}</span>
              </label>
  
              {/* Audio Recording Button */}
