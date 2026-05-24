@@ -9,6 +9,7 @@
 
  import React, { useState, useEffect } from 'react'
  import PropTypes from 'prop-types'
+ import { parse as parseExif } from 'exifr/dist/lite.esm.mjs'
  import { useAuth } from '../../hooks/useAuth'
  import { useLocation } from '../../hooks/useLocation'
  import { useMediaRecorder } from '../../hooks/useMediaRecorder'
@@ -190,17 +191,62 @@
    }, [isOpen])
  
    /**
-    * Handle photo upload from file input
-    * Converts file to data URL for preview and storage
-    * Updated: August 9, 2025 - Maintained original functionality
+    * Handle photo upload — corrects EXIF orientation and resizes to max 1920px.
+    * Fixes Samsung (Android) photos being cropped incorrectly due to EXIF rotation tags.
     */
-   const handlePhotoUpload = (e) => {
+   const handlePhotoUpload = async (e) => {
      const file = e.target.files[0]
-     if (file) {
-       const reader = new FileReader()
-       reader.onload = (e) => {
-         setNewPin(prev => ({ ...prev, photo: e.target.result }))
+     if (!file) return
+
+     const applyAndSet = (orientation, img, w, h) => {
+       const swapped = orientation >= 5 && orientation <= 8
+       const canvas = document.createElement('canvas')
+       canvas.width  = swapped ? h : w
+       canvas.height = swapped ? w : h
+       const ctx = canvas.getContext('2d')
+       switch (orientation) {
+         case 2: ctx.transform(-1, 0,  0,  1, w, 0); break
+         case 3: ctx.transform(-1, 0,  0, -1, w, h); break
+         case 4: ctx.transform( 1, 0,  0, -1, 0, h); break
+         case 5: ctx.transform( 0, 1,  1,  0, 0, 0); break
+         case 6: ctx.transform( 0, 1, -1,  0, h, 0); break
+         case 7: ctx.transform( 0, -1, -1, 0, h, w); break
+         case 8: ctx.transform( 0, -1,  1,  0, 0, w); break
+         default: break
        }
+       ctx.drawImage(img, 0, 0, w, h)
+       setNewPin(prev => ({ ...prev, photo: canvas.toDataURL('image/jpeg', 0.85) }))
+     }
+
+     try {
+       const orientation = await parseExif(file, ['Orientation'])
+         .then(d => d?.Orientation ?? 1)
+         .catch(() => 1)
+
+       const objectUrl = URL.createObjectURL(file)
+       const img = new Image()
+       img.onload = () => {
+         URL.revokeObjectURL(objectUrl)
+         const MAX = 1920
+         let w = img.naturalWidth
+         let h = img.naturalHeight
+         if (w > MAX || h > MAX) {
+           const ratio = Math.min(MAX / w, MAX / h)
+           w = Math.round(w * ratio)
+           h = Math.round(h * ratio)
+         }
+         applyAndSet(orientation, img, w, h)
+       }
+       img.onerror = () => {
+         URL.revokeObjectURL(objectUrl)
+         const reader = new FileReader()
+         reader.onload = ev => setNewPin(prev => ({ ...prev, photo: ev.target.result }))
+         reader.readAsDataURL(file)
+       }
+       img.src = objectUrl
+     } catch {
+       const reader = new FileReader()
+       reader.onload = ev => setNewPin(prev => ({ ...prev, photo: ev.target.result }))
        reader.readAsDataURL(file)
      }
    }
