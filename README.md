@@ -13,3 +13,14 @@ Profile:You choose an illustrated avatar guide, a colour palette that matches yo
 The philosophy:
 
 BiNx is built around the idea that the best recommendations come from knowing someone's taste deeply. The more you use it, the more moments you capture, the more personal the experience becomes.
+
+Under the Hood
+
+BiNx is built on a modern full-stack architecture:
+
+Frontend: React + Vite, styled with Tailwind CSS, state managed by Zustand
+Backend: Supabase: PostgreSQL database, Auth, and Storage for photos and audio
+AI Layer" Anthropic Claude (Haiku) via Supabase Edge Functions (Deno runtime), streaming recommendations in real time
+Intelligence: Claude acts as a stateless reasoning engine: it receives your location, weather, time of day, and a personalized taste profile built from your saved pins, then generates contextual place recommendations ranked by confidence
+Memory: Your taste profile, pins, and preferences live in Supabase; Claude reads them fresh each session rather than retaining any state itself
+Real-time sync: Supabase Realtime pushes pin changes across devices the moment they happen
